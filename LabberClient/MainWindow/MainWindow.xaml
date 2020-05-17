@@ -1,0 +1,86 @@
+﻿<Window
+    x:Class="LabberClient.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="MCB.Labber"
+    Height="600"
+    Width="800"
+    MinHeight="600"
+    MinWidth="800"
+    WindowStartupLocation="CenterScreen"
+    Background="WhiteSmoke"
+    MouseDown="ClearFocus">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="75"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Background="GhostWhite">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="300" Width="300"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.Effect>
+                <DropShadowEffect
+                    BlurRadius="20"
+                    ShadowDepth="0"
+                    Opacity="0.7"/>
+            </Grid.Effect>
+
+            <StackPanel Orientation="Horizontal">
+                <Label
+                    VerticalAlignment="Center"
+                    Margin="20 0 0 0"
+                    FontSize="40"
+                    Foreground="DodgerBlue">
+                    <Label.Effect>
+                        <DropShadowEffect
+                            BlurRadius="10"
+                            ShadowDepth="0"
+                            Opacity="0.2"/>
+                    </Label.Effect>
+                    MCB.Labber
+                </Label>
+
+                <!--<Label
+                    VerticalAlignment="Top"
+                    Margin="0 10 0 0"
+                    FontSize="16"
+                    Foreground="DodgerBlue">
+                    <Label.Effect>
+                        <DropShadowEffect
+                            BlurRadius="10"
+                            ShadowDepth="0"
+                            Opacity="0.2"/>
+                    </Label.Effect>
+                    .Teacher
+                </Label>-->
+            </StackPanel>
+
+            <TextBlock
+                Margin="0 0 20 0"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Right"
+                TextWrapping="Wrap"
+                TextAlignment="Right"
+                TextTrimming="CharacterEllipsis">
+                sldkfsldkfsldhfsdhjf
+            </TextBlock>
+        </Grid>
+
+        <Frame
+            Focusable="False"
+            Grid.Row="1"
+            Margin="10"
+            Content="{Binding CurrentPage}"
+            NavigationUIVisibility="Hidden"
+            IsManipulationEnabled="False">
+        </Frame>
+    </Grid>
+</Window>
