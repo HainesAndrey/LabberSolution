@@ -38,13 +38,22 @@ namespace LabberClient
 
         private void MainWindowVM_CompleteStateEvent(object parameter)
         {
-            if (CurrentPage is LoginPage)
+            switch (CurrentPage.GetType().Name)
             {
-                if (parameter is string && (string)parameter == "createDB")
-                    CurrentPage = new CreateDBPage(0, null, ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
-            }
-            else
-                CurrentPage = new WorkspacePage((uint)parameter, Settings.Default.dbconnectionstring, ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                case nameof(LoginPage):
+                    if (parameter is string && (string)parameter == "createDB")
+                        CurrentPage = new CreateDBPage(0, null, ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                    break;
+
+                case nameof(CreateDBPage):
+                    if (parameter is string && (string)parameter == "cancel")
+                        CurrentPage = new LoginPage(0, null, ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                    break;
+
+                default:
+                    CurrentPage = new WorkspacePage((uint)parameter, Settings.Default.dbconnectionstring, ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                    break;
+            }   
         }
 
         private void MainWindowVM_LoadingStateEvent(bool state)

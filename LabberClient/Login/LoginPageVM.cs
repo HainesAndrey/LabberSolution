@@ -2,6 +2,7 @@
 using LabberClient.VMStuff;
 using Microsoft.Win32;
 using System.Linq;
+using System.Windows;
 
 namespace LabberClient.Login
 {
@@ -11,7 +12,6 @@ namespace LabberClient.Login
         private string fileName = "\"Не выбран\"";
         //private string name = Environment.UserName;
         private string login = "adminPOIT";
-
 
         //public string FilePath { get => filePath; set { filePath = value; OnPropertyChanged("FilePath"); } }
         public string FileName { get => fileName; set { fileName = value; OnPropertyChanged("FileName"); } }
@@ -36,6 +36,7 @@ namespace LabberClient.Login
                 else
                     FileName = "\"Не выбран\"";
                 db.FilePath = openFileDialog.FileName;
+                Settings.Default.dbconnectionstring = openFileDialog.FileName;
             });
 
             LogIn = new RelayCommand<string>(LogInAction);

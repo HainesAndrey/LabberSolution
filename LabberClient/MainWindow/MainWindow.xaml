@@ -13,6 +13,35 @@
     WindowStartupLocation="CenterScreen"
     Background="WhiteSmoke"
     MouseDown="ClearFocus">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style x:Key="Response" TargetType="TextBlock">
+                <Setter Property="Opacity" Value="1"/>
+                <Style.Triggers>
+                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                        <EventTrigger.Actions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation
+                                        Storyboard.TargetProperty="(TextBlock.Opacity)" 
+                                        To="1"
+                                        Duration="0:0:0.25"/>
+                                    <DoubleAnimation
+                                        Storyboard.TargetProperty="(TextBlock.Opacity)" 
+                                        From="1"
+                                        To="0"
+                                        BeginTime="0:0:5"
+                                        Duration="0:0:1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger.Actions>
+                    </EventTrigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="75"/>
@@ -37,14 +66,14 @@
                     VerticalAlignment="Center"
                     Margin="20 0 0 0"
                     FontSize="40"
-                    Foreground="DodgerBlue">
+                    Foreground="DodgerBlue"
+                    Content="MCB.Labber">
                     <Label.Effect>
                         <DropShadowEffect
                             BlurRadius="10"
                             ShadowDepth="0"
                             Opacity="0.2"/>
                     </Label.Effect>
-                    MCB.Labber
                 </Label>
 
                 <!--<Label
@@ -69,8 +98,12 @@
                 HorizontalAlignment="Right"
                 TextWrapping="Wrap"
                 TextAlignment="Right"
-                TextTrimming="CharacterEllipsis">
-                sldkfsldkfsldhfsdhjf
+                TextTrimming="CharacterEllipsis"
+                FontSize="14"
+                x:Name="Response"
+                Text="{Binding ResponseMessage, NotifyOnTargetUpdated=True}"
+                Foreground="{Binding ResponseBrush}"
+                Style="{StaticResource Response}">
             </TextBlock>
         </Grid>
 

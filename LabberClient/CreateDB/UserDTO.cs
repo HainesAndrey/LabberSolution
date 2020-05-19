@@ -4,7 +4,7 @@ namespace LabberClient.CreateDB
 {
     public class UserDTO
     {
-        public User User { get; set; }
+        public User User { get; set; } = new User();
         public bool IsAdmin { get; set; }
 
         public UserDTO() { }
