@@ -58,20 +58,21 @@
                 <TextBlock
                     Text="Файл базы данных:"
                     Margin="80 0"
-                    FontSize="13"/>
+                    FontSize="14"/>
                 <StackPanel
                     Orientation="Horizontal">
                     <TextBox
                         Margin="80 0 5 0"
                         Width="175"
-                        IsEnabled="False"
+                        IsReadOnly="True"
+                        Foreground="Gray"
                         Text="{Binding FileName}"
-                        FontSize="13"/>
+                        FontSize="14"/>
                     <Button
                         Content="Выбрать..."
                         Width="60"
                         Command="{Binding ShowFileDialog}"
-                        FontSize="13"/>
+                        FontSize="14"/>
                 </StackPanel>
             </StackPanel>
 
@@ -80,11 +81,11 @@
                 <TextBlock
                     Text="Логин:"
                     Margin="80 0"
-                    FontSize="13"/>
+                    FontSize="14"/>
                 <TextBox
                     Margin="80 0"
                     Text="{Binding Login, Mode=TwoWay}"
-                    FontSize="13"/>
+                    FontSize="14"/>
             </StackPanel>
 
             <StackPanel
@@ -92,11 +93,11 @@
                 <TextBlock
                     Text="Пароль:"
                     Margin="80 0"
-                    FontSize="13"/>
+                    FontSize="14"/>
                 <PasswordBox
                     x:Name="psw"
                     Margin="80 0"
-                    FontSize="13"/>
+                    FontSize="14"/>
             </StackPanel>
 
             <Button

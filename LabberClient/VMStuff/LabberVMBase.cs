@@ -1,8 +1,9 @@
 ﻿using LabberLib.DataBaseContext;
+using MvvmCross.ViewModels;
 
 namespace LabberClient.VMStuff
 {
-    public abstract class LabberVMBase : VMBase, ILabberVM
+    public abstract class LabberVMBase : MvxViewModel, ILabberVM
     {
         public event ResponseHandler ResponseEvent;
         public event PageEnabledHandler PageEnabledEvent;
@@ -17,8 +18,7 @@ namespace LabberClient.VMStuff
             this.PageEnabledEvent = PageEnabledEvent;
             this.LoadingStateEvent = LoadingStateEvent;
             this.CompleteStateEvent = CompleteStateEvent;
-            db = new DBWorker(dbconnectionstring);
-            db.UserId = userId;
+            db = new DBWorker(userId, dbconnectionstring);
         }
 
         public void InvokeResponseEvent(ResponseType responseType, string msg)

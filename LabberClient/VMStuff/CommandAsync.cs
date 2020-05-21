@@ -1,24 +1,24 @@
-﻿using GalaSoft.MvvmLight.CommandWpf;
+﻿using MvvmCross.Commands;
 using System;
 using System.Threading.Tasks;
 
 namespace LabberClient.VMStuff
 {
-    public class CommandAsync : RelayCommand
+    public class CommandAsync : MvxCommand
     {
         public CommandAsync(Action asyncAction) : base(asyncAction) { }
 
-        public override async void Execute(object parameter)
+        public new async void Execute(object parameter)
         {
             await Task.Run(() => base.Execute(parameter));
         }
     }
 
-    public class CommandAsync<T> : RelayCommand<T>
+    public class CommandAsync<T> : MvxCommand<T>
     {
         public CommandAsync(Action<T> asyncAction) : base(asyncAction) { }
 
-        public override async void Execute(object parameter)
+        public new async void Execute(object parameter)
         {
             await Task.Run(() => base.Execute(parameter));
         }
