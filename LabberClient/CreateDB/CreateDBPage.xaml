@@ -5,356 +5,455 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     mc:Ignorable="d" 
-    d:DesignHeight="400"
-    d:DesignWidth="700"
-    Title="CreateDBPage">
-    <Grid>
+    Width="700"
+    MinHeight="400"
+    Title="CreateDBPage"
+    x:Name="page">
+    <Grid
+        Grid.Row="0"
+        Grid.Column="1"
+        Background="GhostWhite">
         <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="400"/>
-            <RowDefinition/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="45"/>
         </Grid.RowDefinitions>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="700"/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
+        <Grid.Effect>
+            <DropShadowEffect
+                BlurRadius="20"
+                ShadowDepth="0"
+                Opacity="0.7"/>
+        </Grid.Effect>
+
+        <Border
+            BorderBrush="Gray"
+            Grid.RowSpan="10"
+            BorderThickness="1"/>
+
+        <TextBlock
+            Text="Создание новой базы данных"
+            Foreground="DodgerBlue"
+            TextAlignment="Center"
+            TextWrapping="Wrap"
+            FontSize="18"
+            VerticalAlignment="Center">
+            <TextBlock.Effect>
+                <DropShadowEffect
+                    BlurRadius="10"
+                    ShadowDepth="0"
+                    Opacity="0.2"/>
+            </TextBlock.Effect>
+        </TextBlock>
+
+        <StackPanel
+            Grid.Row="1"
+            HorizontalAlignment="Left"
+            Margin="20 0">
+            <TextBlock
+                Text="Название файла новой базы данных:"
+                FontSize="14"/>
+
+            <TextBox
+                Margin="0 2 0 0"
+                Width="659"
+                VerticalAlignment="Bottom"
+                Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged}"
+                FontSize="14"
+                Foreground="DodgerBlue"/>
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="2"
+            HorizontalAlignment="Left"
+            Margin="20 0">
+            <TextBlock
+                Text="Путь к файлу новой базы данных:"
+                FontSize="14"/>
+            <StackPanel
+                Orientation="Horizontal"
+                Margin="0 2 0 0">
+                <TextBox
+                    Width="590"
+                    Text="{Binding FullPath}"
+                    FontSize="14"
+                    IsReadOnly="True"
+                    Foreground="Gray"/>
+                <Button
+                    Margin="5 0 0 0"
+                    Content="Обзор..."
+                    Width="64"
+                    FontSize="14"
+                    Command="{Binding ShowFileDialog}"/>
+            </StackPanel>
+        </StackPanel>
 
         <Grid
-            Grid.Row="1"
-            Grid.Column="1"
-            Background="GhostWhite">
+            Grid.Row="3"
+            Margin="20 5 20 0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="40"/>
-                <RowDefinition Height="45"/>
-                <RowDefinition Height="45"/>
+                <RowDefinition Height="20"/>
                 <RowDefinition/>
-                <RowDefinition Height="45"/>
             </Grid.RowDefinitions>
-
-            <Grid.Effect>
-                <DropShadowEffect
-                    BlurRadius="20"
-                    ShadowDepth="0"
-                    Opacity="0.7"/>
-            </Grid.Effect>
-
-            <Border
-                BorderBrush="Gray"
-                Grid.RowSpan="10"
-                BorderThickness="1"/>
-
+            
             <TextBlock
-                Text="Создание новой базы данных"
-                Foreground="DodgerBlue"
-                TextAlignment="Center"
-                TextWrapping="Wrap"
-                FontSize="18"
-                VerticalAlignment="Center"/>
+                Text="Добавление пользователей:"
+                FontSize="14"
+                Margin="0 0 0 2"/>
+            
+            <Grid
+                Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="80"/>
+                </Grid.RowDefinitions>
 
-            <StackPanel
-                Grid.Row="1"
-                HorizontalAlignment="Left"
-                Margin="20 0">
-                <TextBlock
-                    Text="Название файла новой базы данных:"
-                    FontSize="14"/>
-
-                <TextBox
-                    Margin="0 2 0 0"
-                    Width="659"
-                    VerticalAlignment="Bottom"
-                    Text="{Binding FileName}"
-                    FontSize="14"/>
-            </StackPanel>
-
-            <StackPanel
-                Grid.Row="2"
-                HorizontalAlignment="Left"
-                Margin="20 0">
-                <TextBlock
-                    Text="Путь к файлу новой базы данных (папка):"
-                    FontSize="14"/>
-                <StackPanel
-                    Orientation="Horizontal"
-                    Margin="0 2 0 0">
-                    <TextBox
-                        Width="590"
-                        Text="{Binding FileName}"
-                        FontSize="14"/>
-                    <Button
-                        Margin="5 0 0 0"
-                        Content="Обзор..."
-                        Width="64"
-                        FontSize="14"
-                        Command="{Binding ShowFileDialog}"/>
-                </StackPanel>
-            </StackPanel>
-
-            <StackPanel
-                Grid.Row="3"
-                Margin="20 5 20 0">
-                <TextBlock
-                    Text="Добавление пользователей:"
-                    FontSize="14"
-                    Margin="0 0 0 2"/>
-                <Grid
-                    Height="200">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1.6*"/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <DataGrid
-                        ScrollViewer.CanContentScroll="False"
-                        AutoGenerateColumns="False"
-                        IsReadOnly="True"
-                        SelectionMode="Single"
-                        SelectionUnit="FullRow"
-                        CanUserReorderColumns="False"
-                        CanUserSortColumns="True"
-                        HeadersVisibility="Column"
-                        VerticalScrollBarVisibility="Visible"
-                        HorizontalScrollBarVisibility="Hidden"
-                        BorderBrush="LightGray"
-                        BorderThickness="1 1 1 0"
-                        HorizontalGridLinesBrush="LightGray"
-                        VerticalGridLinesBrush="LightGray"
-                        Background="WhiteSmoke"
-                        ItemsSource="{Binding Users, Mode=TwoWay}"
-                        SelectedItem="{Binding CurrentUser}"
-                        RowHeight="25"
-                        MaxHeight="125">
-
-                        <DataGrid.Resources>
-                            <ContextMenu
-                                x:Key="RowMenu" 
-                                DataContext="{Binding PlacementTarget.DataContext,
-                                    RelativeSource={RelativeSource Self}}">
-                                <MenuItem
-                                    Header="Редактировать"
-                                    Command="{Binding ChangeUser}"/>
-                                <MenuItem
-                                    Header="Удалить"
-                                    Command="{Binding DeleteUser}"/>
-                            </ContextMenu>
-                        </DataGrid.Resources>
+                <ListView
+                    SelectionMode="Single"
+                    BorderBrush="LightGray"
+                    BorderThickness="1 1 1 0"
+                    Background="WhiteSmoke"
+                    ItemsSource="{Binding Users}"
+                    SelectedItem="{Binding CurrentUser}"
+                    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    ScrollViewer.CanContentScroll="False">
+                    <ListView.Resources>
+                        <ContextMenu
+                            x:Key="RowMenu" 
+                            DataContext="{Binding PlacementTarget.Tag,
+                                RelativeSource={RelativeSource Self}}">
+                            <MenuItem
+                                Header="Редактировать"
+                                Command="{Binding ChangeUser}"/>
+                            <MenuItem
+                                Header="Удалить"
+                                IsEnabled="{Binding DeleteUserEnabled}"
+                                Command="{Binding DeleteUser}"/>
+                            <MenuItem
+                                Header="Удалить всё"
+                                Command="{Binding DeleteAll}"
+                                IsEnabled="{Binding DeleteAllEnabled}"/>
+                        </ContextMenu>
                         
-                        <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
-                                <Setter Property="FontSize" Value="14"/>
-                                <Setter Property="Foreground" Value="Black"/>
-                                <Setter Property="ContextMenu" Value="{StaticResource RowMenu}" />
-                                <Style.Triggers>
-                                    <Trigger Property="DataGridRow.IsSelected" Value="True">
-                                        <Setter Property="Background" Value="DeepSkyBlue"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.RowStyle>
+                        <Style TargetType="{x:Type GridViewColumnHeader}">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Background" Value="White"/>
+                            <Setter Property="Height" Value="25"/>
+                            <Setter Property="FontSize" Value="14"/>
+                            <Setter Property="IsHitTestVisible" Value="False"/>
+                        </Style>
 
-                        <DataGrid.CellStyle>
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="Foreground" Value="Black"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                            <Grid>
-                                                <ContentPresenter VerticalAlignment="Center" />
-                                            </Grid>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </DataGrid.CellStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="Tag" Value="{Binding ElementName=page, Path=DataContext}"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="Height" Value="25"/>
+                            <Setter Property="FontSize" Value="14"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                            <Setter Property="ContextMenu" Value="{StaticResource RowMenu}"/>
+                        </Style>
 
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Логин" Width="138"
-                                Binding="{Binding User.Login}"/>
+                        <DataTemplate x:Key="MyDataTemplate">
+                            <Border BorderBrush="Black" Background="Red"  BorderThickness="1,1,0,0" Margin="-6,-2,-6,-2">
+                                <StackPanel Margin="6,2,6,2">
+                                    <TextBlock Text="{Binding}"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.Resources>
 
-                            <DataGridCheckBoxColumn Header="Администратор" Width="98"
-                                Binding="{Binding IsAdmin}"/>
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem
+                                Header="Удалить всё"
+                                Command="{Binding DeleteAll}"
+                                IsEnabled="{Binding DeleteAllEnabled}"/>
+                        </ContextMenu>
+                    </ListView.ContextMenu>
 
-                            <DataGridTextColumn Header="Фамилия" Width="135"
-                                Binding="{Binding User.Surname}"/>
+                    <ListView.View>
+                        <GridView
+                            AllowsColumnReorder="False">
+                            <GridViewColumn
+                                DisplayMemberBinding="{Binding Path=User.Login}"
+                                Width="140"
+                                Header="Логин"/>
 
-                            <DataGridTextColumn Header="Имя" Width="135"
-                                Binding="{Binding User.FirstName}"/>
+                            <GridViewColumn
+                                Width="60">
+                                <TextBlock Text="Админ." HorizontalAlignment="Center"/>
+                                <GridViewColumn.CellTemplate>
+                                    <ItemContainerTemplate>
+                                        <CheckBox
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            IsChecked="{Binding IsAdmin}"
+                                            IsHitTestVisible="False" Focusable="False">
+                                        </CheckBox>
+                                    </ItemContainerTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
 
-                            <DataGridTextColumn Header="Отчество" Width="135"
-                                Binding="{Binding User.SecondName}"/>
-                        </DataGrid.Columns>
+                            <GridViewColumn
+                                DisplayMemberBinding="{Binding User.Surname}"
+                                Width="145"
+                                Header="Фамилия"/>
 
-                        <DataGrid.ContextMenu>
-                            <ContextMenu>
-                                <!--<MenuItem
-                                    Header="Редактировать"
-                                    Command="{Binding ChangeUser}"/>
-                                <MenuItem
-                                    Header="Удалить"
-                                    Command="{Binding DeleteUser}"/>-->
-                                <MenuItem
-                                    Header="Удалить всё"
-                                    Command="{Binding DeleteAll}"
-                                    IsEnabled="{Binding DeleteAllEnabled}"/>
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-                    </DataGrid>
+                            <GridViewColumn
+                                DisplayMemberBinding="{Binding User.FirstName}"
+                                Width="145"
+                                Header="Имя"/>
+
+                            <GridViewColumn
+                                DisplayMemberBinding="{Binding User.SecondName}"
+                                Width="145"
+                                Header="Отчество"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+                <!--<DataGrid
+                    ScrollViewer.CanContentScroll="False"
+                    AutoGenerateColumns="False"
+                    IsReadOnly="True"
+                    SelectionMode="Single"
+                    SelectionUnit="FullRow"
+                    CanUserReorderColumns="False"
+                    CanUserSortColumns="True"
+                    HeadersVisibility="Column"
+                    VerticalScrollBarVisibility="Visible"
+                    HorizontalScrollBarVisibility="Hidden"
+                    BorderBrush="LightGray"
+                    BorderThickness="1 1 1 0"
+                    HorizontalGridLinesBrush="LightGray"
+                    VerticalGridLinesBrush="LightGray"
+                    Background="WhiteSmoke"
+                    ItemsSource="{Binding Users}"
+                    SelectedItem="{Binding CurrentUser}"
+                    RowHeight="25">
+
+                    <DataGrid.Resources>
+                        <ContextMenu
+                            x:Key="RowMenu" 
+                            DataContext="{Binding PlacementTarget.Tag,
+                                RelativeSource={RelativeSource Self}}">
+                            <MenuItem
+                                Header="Редактировать"
+                                Command="{Binding ChangeUser}"/>
+                            <MenuItem
+                                Header="Удалить"
+                                Command="{Binding DeleteUser}"/>
+                            <MenuItem
+                                Header="Удалить всё"
+                                Command="{Binding DeleteAll}"
+                                IsEnabled="{Binding DeleteAllEnabled}"/>
+                        </ContextMenu>
+                    </DataGrid.Resources>
+
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Tag" Value="{Binding ElementName=page, Path=DataContext}"/>
+                            <Setter Property="FontSize" Value="14"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="ContextMenu" Value="{StaticResource RowMenu}" />
+                            <Style.Triggers>
+                                <Trigger Property="DataGridRow.IsSelected" Value="True">
+                                    <Setter Property="Background" Value="DeepSkyBlue"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                        <Grid>
+                                            <ContentPresenter VerticalAlignment="Center" />
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.CellStyle>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Логин" Width="138"
+                            Binding="{Binding User.Login}"/>
+
+                        <DataGridCheckBoxColumn Header="Администратор" Width="98"
+                            Binding="{Binding IsAdmin}"/>
+
+                        <DataGridTextColumn Header="Фамилия" Width="135"
+                            Binding="{Binding User.Surname}"/>
+
+                        <DataGridTextColumn Header="Имя" Width="135"
+                            Binding="{Binding User.FirstName}"/>
+
+                        <DataGridTextColumn Header="Отчество" Width="135"
+                            Binding="{Binding User.SecondName}"/>
+                    </DataGrid.Columns>
+
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem
+                                Header="Удалить всё"
+                                Command="{Binding DeleteAll}"
+                                IsEnabled="{Binding DeleteAllEnabled}"/>
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                </DataGrid>-->
+
+                <Grid
+                    Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="145"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="145"/>
+                        <ColumnDefinition Width="145"/>
+                        <ColumnDefinition Width="145"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="40"/>
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.ColumnSpan="6"
+                        BorderBrush="Gray"
+                        BorderThickness="1 1 1 1"/>
+
+                    <Border
+                        Background="WhiteSmoke"
+                        Grid.Row="1"
+                        Grid.ColumnSpan="6"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 1 1"/>
+
+                    <Border
+                        Grid.ColumnSpan="6"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 1 1"/>
+
+                    <Border
+                        Grid.Column="1"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 0 0"/>
+
+                    <Border
+                        Grid.Column="2"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 0 0"/>
+
+                    <Border
+                        Grid.Column="3"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 0 0"/>
+
+                    <Border
+                        Grid.Column="4"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 0 0"/>
+
+                    <TextBox
+                        Margin="4 0 3 0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}"
+                            
+                        FontSize="14"/>
+
+                    <CheckBox
+                        Grid.Column="1"
+                        Margin="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        IsChecked="{Binding IsAdmin, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBox
+                        Grid.Column="2"
+                        Margin="4 0 3 0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Surname, UpdateSourceTrigger=PropertyChanged}"
+                        FontSize="14"/>
+
+                    <TextBox
+                        Grid.Column="3"
+                        Margin="4 0 3 0"
+                        VerticalAlignment="Center"
+                        Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}"
+                        FontSize="14"/>
+
+                    <TextBox
+                        Grid.Column="4"
+                        Margin="4 0 3 0"
+                        VerticalAlignment="Center"
+                        Text="{Binding SecondName, UpdateSourceTrigger=PropertyChanged}"
+                        FontSize="14"/>
 
                     <Grid
-                        Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="138"/>
-                            <ColumnDefinition Width="98"/>
-                            <ColumnDefinition Width="135"/>
-                            <ColumnDefinition Width="135"/>
-                            <ColumnDefinition Width="135"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="40"/>
-                        </Grid.RowDefinitions>
-
-                        <Border
-                            Grid.ColumnSpan="6"
-                            BorderBrush="Gray"
-                            BorderThickness="1 1 1 1"/>
-
-                        <Border
-                            Background="WhiteSmoke"
-                            Grid.Row="1"
-                            Grid.ColumnSpan="6"
-                            BorderBrush="Gray"
-                            BorderThickness="1 0 1 1"/>
-
-                        <Border
-                            Grid.ColumnSpan="6"
-                            BorderBrush="Gray"
-                            BorderThickness="1 0 1 1"/>
-
-                        <Border
-                            Grid.Column="1"
-                            BorderBrush="Gray"
-                            BorderThickness="1 0 0 0"/>
-
-                        <Border
-                            Grid.Column="2"
-                            BorderBrush="Gray"
-                            BorderThickness="1 0 0 0"/>
-
-                        <Border
-                            Grid.Column="3"
-                            BorderBrush="Gray"
-                            BorderThickness="1 0 0 0"/>
-
-                        <Border
-                            Grid.Column="4"
-                            BorderBrush="Gray"
-                            BorderThickness="1 0 0 0"/>
-
-                        <TextBox
-                            Margin="4 0 3 0"
-                            VerticalAlignment="Center"
-                            Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}"
-                            
-                            FontSize="14"/>
-
-                        <CheckBox
-                            Grid.Column="1"
-                            Margin="4 0 3 0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            IsChecked="{Binding IsAdmin, UpdateSourceTrigger=PropertyChanged}"/>
-
-                        <TextBox
-                            Grid.Column="2"
-                            Margin="4 0 3 0"
-                            VerticalAlignment="Center"
-                            Text="{Binding Surname, UpdateSourceTrigger=PropertyChanged}"
-                            FontSize="14"/>
-
-                        <TextBox
-                            Grid.Column="3"
-                            Margin="4 0 3 0"
-                            VerticalAlignment="Center"
-                            Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}"
-                            FontSize="14"/>
-
-                        <TextBox
-                            Grid.Column="4"
-                            Margin="4 0 3 0"
-                            VerticalAlignment="Center"
-                            Text="{Binding SecondName, UpdateSourceTrigger=PropertyChanged}"
-                            FontSize="14"/>
-
-                        <Grid
-                            Grid.Row="1"
-                            Grid.ColumnSpan="6"
+                        Grid.Row="1"
+                        Grid.ColumnSpan="6"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                        <StackPanel
+                            Orientation="Horizontal"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center">
-                            <StackPanel
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center">
-                                <Button
-                                    Margin="10 0 5 0"
-                                    VerticalAlignment="Center"
-                                    Content="Добавить"
-                                    FontSize="12"
-                                    Command="{Binding AddUser}"
-                                    IsEnabled="{Binding AddUserEnabled}"/>
+                            <Button
+                                Margin="10 0 5 0"
+                                VerticalAlignment="Center"
+                                Content="{Binding AddSaveUserBtnTitle}"
+                                FontSize="12"
+                                Command="{Binding AddUser, NotifyOnSourceUpdated=True}"
+                                IsEnabled="{Binding AddUserEnabled}"/>
 
-                                <Button
-                                    Margin="5 0"
-                                    VerticalAlignment="Center"
-                                    Content="Очистить поля"
-                                    FontSize="12"
-                                    Command="{Binding Clear}"
-                                    IsEnabled="{Binding ClearEnabled}"/>
+                            <Button
+                                Margin="5 0"
+                                VerticalAlignment="Center"
+                                Content="Очистить поля"
+                                FontSize="12"
+                                Command="{Binding Clear}"
+                                IsEnabled="{Binding ClearEnabled}"/>
 
-                                <!--<Button
-                                    Margin="5 0"
-                                    VerticalAlignment="Center"
-                                    Content="Удалить всё"
-                                    FontSize="12"
-                                    Command="{Binding DeleteAll}"
-                                    IsEnabled="{Binding DeleteAllEnabled}"/>-->
-
-                                <Button
-                                    Margin="5 0 10 0"
-                                    VerticalAlignment="Center"
-                                    Content="Добавить из Excel"
-                                    FontSize="12"
-                                    Command="{Binding AddFromExel}"/>
-                            </StackPanel>
-                        </Grid>
+                            <Button
+                                Margin="5 0 10 0"
+                                VerticalAlignment="Center"
+                                Content="Добавить из Excel"
+                                FontSize="12"
+                                Command="{Binding AddFromExcel}"/>
+                        </StackPanel>
                     </Grid>
                 </Grid>
-            </StackPanel>
-
-            <Grid
-                Grid.Row="4">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-
-                <Button
-                    Content="Отмена"
-                    VerticalAlignment="Top"
-                    FontSize="14"
-                    Margin="80 5"
-                    Command="{Binding Cancel}"/>
-                <Button
-                    Grid.Column="1"
-                    Content="Продолжить"
-                    VerticalAlignment="Top"
-                    FontSize="14"
-                    Margin="80 5"
-                    Command="{Binding Next}"/>
             </Grid>
+        </Grid>
+
+        <Grid
+            Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Button
+                Content="Отмена"
+                VerticalAlignment="Top"
+                FontSize="14"
+                Margin="80 5"
+                Command="{Binding Cancel}"/>
+            <Button
+                Grid.Column="1"
+                Content="Продолжить"
+                VerticalAlignment="Top"
+                FontSize="14"
+                Margin="80 5"
+                Command="{Binding Next}"/>
         </Grid>
     </Grid>
 </Page>

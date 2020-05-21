@@ -4,10 +4,11 @@ using LabberClient.Workspace;
 using LabberClient.Login;
 using System.Windows.Controls;
 using System.Windows.Media;
+using MvvmCross.ViewModels;
 
 namespace LabberClient
 {
-    public class MainWindowVM : VMBase, ILabberVM
+    public class MainWindowVM : MvxViewModel, ILabberVM
     {
         private Page currentPage;
         private string responseMessage;
@@ -20,11 +21,11 @@ namespace LabberClient
         public event LoadingStateHandler LoadingStateEvent;
         public event CompleteStateHanlder CompleteStateEvent;
 
-        public Page CurrentPage { get => currentPage; set { currentPage = value; OnPropertyChanged("CurrentPage"); } }
-        public string ResponseMessage { get => responseMessage; set { responseMessage = value; OnPropertyChanged("ResponseMessage"); } }
-        public Brush ResponseBrush { get => responseBrush; set { responseBrush = value; OnPropertyChanged("ResponseBrush"); } }
-        public bool PageEnabledState { get => pageEnabledState; set { pageEnabledState = value; OnPropertyChanged("PageEnabledState"); } }
-        public bool LoadingState { get => loadingState; set { loadingState = value; OnPropertyChanged("LoadingState"); } }
+        public Page CurrentPage { get => currentPage; set { currentPage = value; RaisePropertyChanged("CurrentPage"); } }
+        public string ResponseMessage { get => responseMessage; set { responseMessage = value; RaisePropertyChanged("ResponseMessage"); } }
+        public Brush ResponseBrush { get => responseBrush; set { responseBrush = value; RaisePropertyChanged("ResponseBrush"); } }
+        public bool PageEnabledState { get => pageEnabledState; set { pageEnabledState = value; RaisePropertyChanged("PageEnabledState"); } }
+        public bool LoadingState { get => loadingState; set { loadingState = value; RaisePropertyChanged("LoadingState"); } }
 
         public MainWindowVM()
         {
