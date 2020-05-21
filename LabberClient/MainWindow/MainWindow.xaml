@@ -25,9 +25,8 @@
                                 <Storyboard>
                                     <DoubleAnimation
                                         Storyboard.TargetProperty="(TextBlock.Opacity)" 
-                                        From="0"
                                         To="1"
-                                        Duration="0:0:0.5"/>
+                                        Duration="0:0:0.25"/>
                                     <DoubleAnimation
                                         Storyboard.TargetProperty="(TextBlock.Opacity)" 
                                         From="1"
@@ -105,19 +104,13 @@
                 Text="{Binding ResponseMessage, NotifyOnTargetUpdated=True}"
                 Foreground="{Binding ResponseBrush}"
                 Style="{StaticResource Response}">
-                    <TextBlock.Effect>
-                        <DropShadowEffect
-                            BlurRadius="10"
-                            ShadowDepth="0"
-                            Opacity="0.2"/>
-                    </TextBlock.Effect>
             </TextBlock>
         </Grid>
 
         <Frame
             Focusable="False"
             Grid.Row="1"
-            Margin="10 30"
+            Margin="10"
             Content="{Binding CurrentPage}"
             NavigationUIVisibility="Hidden"
             IsManipulationEnabled="False">

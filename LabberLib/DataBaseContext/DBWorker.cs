@@ -1,13 +1,11 @@
 ﻿using LabberLib.DataBaseContext.Entities;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace LabberLib.DataBaseContext
 {
     public class DBWorker : DbContext
     {
-        private const string dbpsw = "31fdfe5fdc61e2b0b768d369ef3a4ab703ba08b632e5fd59f6004c1313e69954a97e562369ce9d62834494a07c97e0cde2c03da17c36394cd1c4bda38da6158e";
-
         public string FilePath { get; set; }
         public string CredName { get; } = "adminPOIT";
         public string CredPsw { get; } = "28032001";
@@ -24,43 +22,27 @@ namespace LabberLib.DataBaseContext
         //public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Journal_Lab> Journals_Labs { get; set; }
 
-        public DBWorker(uint userId, string dbconnectionstring)
+        public DBWorker(string filepath)
         {
-            UserId = userId;
-            FilePath = dbconnectionstring;
+            FilePath = filepath;
         }
 
-        public void Create()
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.UseSqlite($"Filename={FilePath}");
+
+            //Database.EnsureDeleted();
             if (Database.EnsureCreated())
             {
                 Add(new Role("admin"));
                 Add(new Role("teacher"));
                 SaveChanges();
-                //Add(new User(Roles.FirstOrDefault().Id, "adminPOIT", "28032001"));
-                //Add(new User(Roles.FirstOrDefault(x => x.Title == "teacher").Id, "mvmenshikova"));
-                //SaveChanges();
+                Add(new User(Roles.FirstOrDefault().Id, "adminPOIT", "28032001"));
+                Add(new User(Roles.FirstOrDefault(x => x.Title == "teacher").Id, "mvmenshikova"));
+                SaveChanges();
                 //Add(new Teacher(Users.FirstOrDefault(x => x.Name == "mvmenshikova").Id, "Меньшикова", "Марина", "Валерьевна"));
-                //SaveChanges();
+                SaveChanges();
             }
-        }
-
-        public void ReCreate()
-        {
-            Database.EnsureDeleted();
-            Create();
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            var conn = new SqliteConnection($"Filename={FilePath}");
-            conn.Open();
-
-            var command = conn.CreateCommand();
-            command.CommandText = $"PRAGMA password = '{dbpsw}';";
-            command.ExecuteNonQuery();
-
-            optionsBuilder.UseSqlite(conn);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

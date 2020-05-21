@@ -1,7 +1,8 @@
-﻿using LabberClient.VMStuff;
+﻿using GalaSoft.MvvmLight.CommandWpf;
+using LabberClient.VMStuff;
 using Microsoft.Win32;
-using MvvmCross.Commands;
 using System.Linq;
+using System.Windows;
 
 namespace LabberClient.Login
 {
@@ -13,22 +14,22 @@ namespace LabberClient.Login
         private string login = "adminPOIT";
 
         //public string FilePath { get => filePath; set { filePath = value; OnPropertyChanged("FilePath"); } }
-        public string FileName { get => fileName; set { fileName = value; RaisePropertyChanged("FileName"); } }
-        public MvxCommand ShowFileDialog { get; private set; }
-        public MvxCommand<string> LogIn { get; private set; }
-        public string Login { get => login; set { login = value; RaisePropertyChanged("Login"); } }
+        public string FileName { get => fileName; set { fileName = value; OnPropertyChanged("FileName"); } }
+        public RelayCommand ShowFileDialog { get; private set; }
+        public RelayCommand<string> LogIn { get; private set; }
+        public string Login { get => login; set { login = value; OnPropertyChanged("Login"); } }
 
         public LoginPageVM(uint userId, string dbconnectionstring, ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(userId, dbconnectionstring, ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            ShowFileDialog = new MvxCommand(() =>
+            ShowFileDialog = new RelayCommand(() =>
             {
                 OpenFileDialog openFileDialog = new OpenFileDialog()
                 {
                     InitialDirectory = "shell:MyComputerFolder",
-                    DefaultExt = ".db",
+                    DefaultExt = ".sqlite",
                     Title = "Выберите файл базы данных",
-                    Filter = "Файл базы данных|*.db"
+                    Filter = "Файл базы данных|*.sqlite"
                 };
                 if ((bool)openFileDialog.ShowDialog())
                     FileName = openFileDialog.SafeFileName;
@@ -38,7 +39,7 @@ namespace LabberClient.Login
                 Settings.Default.dbconnectionstring = openFileDialog.FileName;
             });
 
-            LogIn = new MvxCommand<string>(LogInAction);
+            LogIn = new RelayCommand<string>(LogInAction);
 
         }
 
