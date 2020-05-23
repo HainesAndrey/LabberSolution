@@ -1,6 +1,8 @@
 ﻿using LabberLib.DataBaseContext.Entities;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 
 namespace LabberLib.DataBaseContext
 {
@@ -12,7 +14,21 @@ namespace LabberLib.DataBaseContext
         public string CredName { get; } = "adminPOIT";
         public string CredPsw { get; } = "28032001";
         public uint UserId { get; set; }
-        public bool IsDbCreated { get => !Database.EnsureCreated(); }
+        //public bool IsFilled
+        //{
+        //    get
+        //    {
+        //        try
+        //        {
+        //            Roles.Count();
+        //        }
+        //        catch (Exception)
+        //        {
+        //            return false;
+        //        }
+        //        return true;
+        //    }
+        //}
 
         public DbSet<Lab> Labs { get; set; }
         public DbSet<Mark> Marks { get; set; }
