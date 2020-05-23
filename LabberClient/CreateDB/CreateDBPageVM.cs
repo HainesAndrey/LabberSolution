@@ -118,7 +118,8 @@ namespace LabberClient.CreateDB
         {
             Users = new ObservableCollection<UserDTO>();
             var view = (CollectionView)CollectionViewSource.GetDefaultView(Users);
-            view.SortDescriptions.Add(new SortDescription("User.Login", ListSortDirection.Ascending));
+            view.SortDescriptions.Add(new SortDescription("IsAdmin", ListSortDirection.Descending));
+            view.SortDescriptions.Add(new SortDescription("User.Surname", ListSortDirection.Ascending));
 
             ShowFileDialog = new MvxCommand(ShowFileDialogBody);
             AddUser = new MvxCommand(AddUserBody);
@@ -133,7 +134,6 @@ namespace LabberClient.CreateDB
 
         private async void NextBody()
         {
-            db.FilePath = FullPath;
             if (FileName == "")
                 InvokeResponseEvent(ResponseType.Bad, "Укажите название файла новой базы данных");
             else if (FilePath == "")
@@ -142,15 +142,16 @@ namespace LabberClient.CreateDB
                 InvokeResponseEvent(ResponseType.Bad, "Добавьте пользователей базы данных");
             else if (!Users.Any(x => x.IsAdmin))
                 InvokeResponseEvent(ResponseType.Bad, "Добавьте хотя бы одного администратора");
-            else if (!db.IsDbCreated)
+            else
             {
                 InvokeResponseEvent(ResponseType.Neutral, "Подождите...");
                 InvokePageEnabledEvent(false);
                 InvokeLoadingStateEvent(true);
                 await Task.Run(() =>
                 {
-                    db.Create();
                     Settings.Default.dbconnectionstring = FilePath;
+                    db.FilePath = FullPath;
+                    db.Create();
                     db.Users.AddRange(Users.Select(x => x.User).Where(x => !db.Users.ToList().Exists(y => y.Login == x.Login)));
                     db.SaveChanges();
                     InvokeResponseEvent(ResponseType.Good, "База данных успешно создана");
