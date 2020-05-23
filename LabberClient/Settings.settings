@@ -5,8 +5,8 @@
     <Setting Name="dbconnectionstring" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="filename" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="userId" Type="System.UInt32" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
   </Settings>
 </SettingsFile>

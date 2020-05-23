@@ -12,13 +12,13 @@ namespace LabberClient.VMStuff
 
         protected DBWorker db;
 
-        public LabberVMBase(uint userId, string dbconnectionstring, ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
+        public LabberVMBase(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
         {
             this.ResponseEvent = ResponseEvent;
             this.PageEnabledEvent = PageEnabledEvent;
             this.LoadingStateEvent = LoadingStateEvent;
             this.CompleteStateEvent = CompleteStateEvent;
-            db = new DBWorker(userId, dbconnectionstring);
+            db = new DBWorker(Settings.Default.userId, Settings.Default.dbconnectionstring);
         }
 
         public void InvokeResponseEvent(ResponseType responseType, string msg)

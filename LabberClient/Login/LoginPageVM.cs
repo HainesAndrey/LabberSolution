@@ -18,8 +18,8 @@ namespace LabberClient.Login
         public MvxCommand<string> LogIn { get; private set; }
         public string Login { get => login; set { login = value; RaisePropertyChanged("Login"); } }
 
-        public LoginPageVM(uint userId, string dbconnectionstring, ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
-            : base(userId, dbconnectionstring, ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
+        public LoginPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
+            : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
             ShowFileDialog = new MvxCommand(() =>
             {

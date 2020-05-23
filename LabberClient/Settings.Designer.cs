@@ -37,13 +37,13 @@ namespace LabberClient {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string filename {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public uint userId {
             get {
-                return ((string)(this["filename"]));
+                return ((uint)(this["userId"]));
             }
             set {
-                this["filename"] = value;
+                this["userId"] = value;
             }
         }
     }

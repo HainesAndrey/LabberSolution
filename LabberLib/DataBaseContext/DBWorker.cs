@@ -12,6 +12,7 @@ namespace LabberLib.DataBaseContext
         public string CredName { get; } = "adminPOIT";
         public string CredPsw { get; } = "28032001";
         public uint UserId { get; set; }
+        public bool IsDbCreated { get => !Database.EnsureCreated(); }
 
         public DbSet<Lab> Labs { get; set; }
         public DbSet<Mark> Marks { get; set; }

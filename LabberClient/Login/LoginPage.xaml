@@ -72,7 +72,7 @@
                         Content="Выбрать..."
                         Width="60"
                         Command="{Binding ShowFileDialog}"
-                        FontSize="14"/>
+                        FontSize="12"/>
                 </StackPanel>
             </StackPanel>
 
@@ -107,7 +107,7 @@
                 VerticalAlignment="Center"
                 Content="Авторизироваться"
                 Click="Button_Click"
-                FontSize="13">
+                FontSize="16">
             </Button>
         </Grid>
     </Grid>
