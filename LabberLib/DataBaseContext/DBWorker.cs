@@ -1,8 +1,6 @@
 ﻿using LabberLib.DataBaseContext.Entities;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 
 namespace LabberLib.DataBaseContext
 {
@@ -10,10 +8,10 @@ namespace LabberLib.DataBaseContext
     {
         private const string dbpsw = "31fdfe5fdc61e2b0b768d369ef3a4ab703ba08b632e5fd59f6004c1313e69954a97e562369ce9d62834494a07c97e0cde2c03da17c36394cd1c4bda38da6158e";
 
-        public string FilePath { get; set; }
-        public string CredName { get; } = "adminPOIT";
-        public string CredPsw { get; } = "28032001";
-        public uint UserId { get; set; }
+        public static string CredName { get; } = "adminPOIT";
+        public static string CredPsw { get; } = "28032001";
+        public static string FilePath { get; set; }
+        public static uint UserId { get; set; }
         //public bool IsFilled
         //{
         //    get
@@ -41,13 +39,13 @@ namespace LabberLib.DataBaseContext
         //public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Journal_Lab> Journals_Labs { get; set; }
 
-        public DBWorker(uint userId, string dbconnectionstring)
+        public DBWorker(bool createIfNotExists = false)
         {
-            UserId = userId;
-            FilePath = dbconnectionstring;
+            if (createIfNotExists)
+                CreateIfNotExists();
         }
 
-        public void Create()
+        public void CreateIfNotExists()
         {
             if (Database.EnsureCreated())
             {
@@ -65,7 +63,26 @@ namespace LabberLib.DataBaseContext
         public void ReCreate()
         {
             Database.EnsureDeleted();
-            Create();
+            CreateIfNotExists();
+        }
+
+        public void Disconnect()
+        {
+            Database.GetDbConnection().Close();
+            Database.GetDbConnection().Dispose();
+            
+        }
+
+        public void DisconnectAndDelete()
+        {
+            Disconnect();
+            Database.EnsureDeleted();
+        }
+
+        public override void Dispose()
+        {
+            Disconnect();
+            //base.Dispose();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
