@@ -131,6 +131,10 @@
         </Grid>
 
         <Frame
+            x:Name="frame"
+            Navigating="frame_Navigating"
+            Opacity="0"
+            IsEnabled="{Binding PageEnabledState}"
             Focusable="False"
             Grid.Row="1"
             Margin="10 30"
