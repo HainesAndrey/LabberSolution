@@ -1,4 +1,5 @@
 ﻿using LabberClient.VMStuff;
+using LabberLib.DataBaseContext;
 using Microsoft.Win32;
 using MvvmCross.Commands;
 using System.Linq;
@@ -34,8 +35,7 @@ namespace LabberClient.Login
                     FileName = openFileDialog.SafeFileName;
                 else
                     FileName = "\"Не выбран\"";
-                db.FilePath = openFileDialog.FileName;
-                Settings.Default.dbconnectionstring = openFileDialog.FileName;
+                DBWorker.FilePath = openFileDialog.FileName;
             });
 
             LogIn = new MvxCommand<string>(LogInAction);
@@ -44,13 +44,13 @@ namespace LabberClient.Login
 
         private void LogInAction(string psw)
         {
-            if (db.FilePath is null || db.FilePath == "")
+            if (FileName == "\"Не выбран\"")
             {
-                if (db.CredName == Login && db.CredPsw == psw)
+                if (DBWorker.CredName == Login && DBWorker.CredPsw == psw)
                     InvokeCompleteStateEvent("createDB");
             }
             else
-                db.UserId = db.Users.FirstOrDefault(x => x.Login == Login && x.Password == psw)?.Id ?? 0;
+                DBWorker.UserId = db.Users.FirstOrDefault(x => x.Login == Login && x.Password == psw)?.Id ?? 0;
         }
 
     }

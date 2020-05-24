@@ -18,7 +18,6 @@ namespace LabberClient.VMStuff
             this.PageEnabledEvent = PageEnabledEvent;
             this.LoadingStateEvent = LoadingStateEvent;
             this.CompleteStateEvent = CompleteStateEvent;
-            db = new DBWorker(Settings.Default.userId, Settings.Default.dbconnectionstring);
         }
 
         public void InvokeResponseEvent(ResponseType responseType, string msg)

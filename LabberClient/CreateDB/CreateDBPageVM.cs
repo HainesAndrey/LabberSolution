@@ -1,4 +1,5 @@
 ﻿using LabberClient.VMStuff;
+using LabberLib.DataBaseContext;
 using LabberLib.DataBaseContext.Entities;
 using MvvmCross.Commands;
 using OfficeOpenXml;
@@ -149,22 +150,24 @@ namespace LabberClient.CreateDB
                 InvokeLoadingStateEvent(true);
                 await Task.Run(() =>
                 {
-                    Settings.Default.dbconnectionstring = FilePath;
-                    db.FilePath = FullPath;
-                    db.Create();
+                    DBWorker.FilePath = FullPath;
+                    DBWorker.UserId = 0;
+                    db = new DBWorker(true);
                     db.Users.AddRange(Users.Select(x => x.User).Where(x => !db.Users.ToList().Exists(y => y.Login == x.Login)));
                     db.SaveChanges();
-                    InvokeResponseEvent(ResponseType.Good, "База данных успешно создана");
+
+                    InvokeResponseEvent(ResponseType.Good, "База данных успешно создана. Пользователи добавлены в базу данных");
                 });
                 InvokeLoadingStateEvent(false);
                 InvokePageEnabledEvent(true);
-                InvokeResponseEvent(ResponseType.Neutral, "");
+                InvokeCompleteStateEvent("next");
             }
-            InvokeCompleteStateEvent("next");
+            
         }
 
         private void CancelBody()
         {
+            db?.DisconnectAndDelete();
             InvokeCompleteStateEvent("cancel");
         }
 
@@ -277,7 +280,7 @@ namespace LabberClient.CreateDB
                             Users.Add(newuser);
                     }
                     DeleteAllEnabled = true;
-                    InvokeResponseEvent(ResponseType.Good, "Пользователи успешно добавлены из файла");
+                    InvokeResponseEvent(ResponseType.Good, "Пользователи успешно загружены из файла");
                 }
             }
         }

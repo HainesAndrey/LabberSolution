@@ -14,11 +14,11 @@ namespace LabberClient
     public class MainWindowVM : MvxViewModel, ILabberVM
     {
         private Page currentPage;
-        private string responseMessage;
+        private string responseMessage = "";
         private Duration duration = new Duration(new TimeSpan(0, 0, 5));
         private Brush responseBrush;
-        private bool pageEnabledState;
-        private bool loadingState;
+        private bool pageEnabledState = true;
+        private bool loadingState = false;
         private CreateDBPage createDBPage;
         private AddSubjectsPage addSubjectsPage;
 
@@ -48,8 +48,8 @@ namespace LabberClient
             LoadingStateEvent += MainWindowVM_LoadingStateEvent;
             CompleteStateEvent += MainWindowVM_CompleteStateEvent;
 
-            createDBPage = new CreateDBPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
-            addSubjectsPage = new AddSubjectsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+            //createDBPage = new CreateDBPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+            //addSubjectsPage = new AddSubjectsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
 
             CurrentPage = new LoginPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent); ;
         }
@@ -60,7 +60,11 @@ namespace LabberClient
             {
                 case nameof(LoginPage):
                     if ((string)parameter == "createDB")
+                    {
+                        createDBPage = new CreateDBPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                        addSubjectsPage = new AddSubjectsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
                         CurrentPage = createDBPage;
+                    }
                     break;
 
                 case nameof(CreateDBPage):
@@ -73,8 +77,8 @@ namespace LabberClient
                 case nameof(AddSubjectsPage):
                     if ((string)parameter == "cancel")
                         CurrentPage = createDBPage;
-                    //else if ((string)parameter == "next")
-                    //    CurrentPage = new AddStudentsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                    else if ((string)parameter == "next")
+                        CurrentPage = new AddStudentsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
                     break;
 
                 default:
