@@ -1,4 +1,5 @@
 ﻿using LabberClient.VMStuff;
+using LabberClient.Workspace.JournalsTab.JournalTable;
 using LabberLib.DataBaseContext.Entities;
 using MvvmCross.Commands;
 using System.Collections.Generic;
@@ -76,7 +77,10 @@ namespace LabberClient.Workspace.JournalsTab
                 Tabs.Add(new TabItem()
                 {
                     Header = GetJournalHeader(journal),
-                    Content = new Frame() { Content = journalId }
+                    Content = new Frame()
+                    {
+                        Content = new JournalTablePage(journal, InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent)
+                    }
                 });
         }
 
