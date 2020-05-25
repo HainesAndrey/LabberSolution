@@ -10,5 +10,10 @@ namespace LabberClient.Workspace.JournalsTab
             InitializeComponent();
             DataContext = new JournalsTabPageVM(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
         }
+
+        private void TreeView_SelectedItemChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<object> e)
+        {
+            (DataContext as JournalsTabPageVM).OpenNewJournal((e.NewValue as Node).IdJournal);
+        }
     }
 }

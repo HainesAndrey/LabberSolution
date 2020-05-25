@@ -13,7 +13,7 @@
     </Page.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="180"/>
+            <ColumnDefinition Width="210"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
@@ -32,30 +32,37 @@
                     Orientation="Horizontal">
                     <RadioButton
                         Content="Группам"
-                        Margin="2 3"/>
+                        Margin="2 3"
+                        IsChecked="True"
+                        Command="{Binding GroupByGroups}"/>
                     
                     <RadioButton
                         Content="Предметам"
-                        Margin="2 3"/>
+                        Margin="2 3"
+                        Command="{Binding GroupBySubjects}"/>
                     
                     <RadioButton
                         Content="Преподавателям"
-                        Margin="2 3"/>
+                        Margin="2 3"
+                        Command="{Binding GroupByTeachers}"/>
                 </WrapPanel>
             </GroupBox>
 
             <GroupBox
                 Grid.Row="1"
                 Margin="0 0 0 10"
-                Header="Фильтрация">
+                Header="Фильтрация:">
                 <StackPanel>
                     <RadioButton
                         Content="Мои журналы"
-                        Margin="2 3"/>
+                        Margin="2 3"
+                        IsChecked="True"
+                        Command="{Binding FilterByOwn}"/>
                     
                     <RadioButton
                         Content="Все журналы"
-                        Margin="2 3"/>
+                        Margin="2 3"
+                        Command="{Binding FilterByAll}"/>
                 </StackPanel>
             </GroupBox>
 
@@ -71,7 +78,9 @@
 
                     <CheckBox
                         Margin="2 3"
-                        Content="Раскрыть все ветви"/>
+                        Content="Раскрыть все ветви"
+                        Command="{Binding ExpandAll}"
+                        CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"/>
 
                     <ProgressBar
                         Grid.Row="1"
@@ -80,14 +89,31 @@
                         Background="Transparent"
                         BorderThickness="0"
                         Margin="2 0"
-                        IsIndeterminate="True"/>
+                        IsIndeterminate="{Binding LoadingState}"/>
 
                     <TreeView
                         Grid.Row="2"
                         Background="Transparent"
                         BorderBrush="LightGray"
                         Margin="2 0"
-                        BorderThickness="0 1 0 0"/>
+                        BorderThickness="0 1 0 0"
+                        SelectedItemChanged="TreeView_SelectedItemChanged"
+                        ItemsSource="{Binding Nodes}"
+                        IsEnabled="{Binding TreeEnabled}">
+                        <TreeView.ItemTemplate>
+                            <HierarchicalDataTemplate ItemsSource="{Binding Nodes}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Margin="0,0,5,0" />
+                                    <TextBlock Text="{Binding Title}" Margin="0,0,4,0" />
+                                </StackPanel>
+                            </HierarchicalDataTemplate>
+                        </TreeView.ItemTemplate>
+                        <TreeView.ItemContainerStyle>
+                            <Style TargetType="TreeViewItem">
+                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                            </Style>
+                        </TreeView.ItemContainerStyle>
+                    </TreeView>
                 </Grid>
             </GroupBox>
         </Grid>
@@ -97,9 +123,8 @@
             <TabControl
                 Background="Transparent"
                 Margin="10 30 5 7"
-                BorderBrush="LightGray">
-                
-            </TabControl>
+                BorderBrush="LightGray"
+                ItemsSource="{Binding Tabs}"/>
         </Grid>
     </Grid>
 </Page>
