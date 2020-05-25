@@ -20,7 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Students\StudentsTable\" />
+    <Folder Include="Workspace\LabsTab\" />
+    <Folder Include="Workspace\DebtsTab\" />
+    <Folder Include="Workspace\AdminTab\" />
   </ItemGroup>
 
 </Project>

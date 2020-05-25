@@ -28,7 +28,7 @@
             BorderThickness="1"/>
 
         <TextBlock
-            Text="Добавление дисциплин в новую базу данных"
+            Text="Добавление дисциплин в новую базу данных (необязательно)"
             Foreground="DodgerBlue"
             TextAlignment="Center"
             TextWrapping="Wrap"
@@ -61,14 +61,16 @@
                 Content="Назад"
                 VerticalAlignment="Top"
                 FontSize="14"
-                Margin="80 5"
+                Margin="0 5"
+                Width="200"
                 Command="{Binding Cancel}"/>
             <Button
                 Grid.Column="1"
                 Content="Продолжить"
                 VerticalAlignment="Top"
                 FontSize="14"
-                Margin="80 5"
+                Margin="0 5"
+                Width="200"
                 Command="{Binding Next}"/>
         </Grid>
     </Grid>

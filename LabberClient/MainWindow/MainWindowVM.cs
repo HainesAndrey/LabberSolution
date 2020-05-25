@@ -8,6 +8,7 @@ using MvvmCross.ViewModels;
 using LabberClient.Subjects;
 using System.Windows;
 using System;
+using LabberClient.Students;
 
 namespace LabberClient
 {
@@ -21,6 +22,7 @@ namespace LabberClient
         private bool loadingState = false;
         private CreateDBPage createDBPage;
         private AddSubjectsPage addSubjectsPage;
+        private AddStudentsPage addStudentsPage;
 
         public event ResponseHandler ResponseEvent;
         public event PageEnabledHandler PageEnabledEvent;
@@ -51,7 +53,9 @@ namespace LabberClient
             //createDBPage = new CreateDBPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
             //addSubjectsPage = new AddSubjectsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
 
-            CurrentPage = new LoginPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent); ;
+            //CurrentPage = new LoginPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+            //CurrentPage = new AddStudentsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent); ;
+            CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
         }
 
         private void MainWindowVM_CompleteStateEvent(object parameter)
@@ -63,6 +67,7 @@ namespace LabberClient
                     {
                         createDBPage = new CreateDBPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
                         addSubjectsPage = new AddSubjectsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                        addStudentsPage = new AddStudentsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
                         CurrentPage = createDBPage;
                     }
                     break;
@@ -78,7 +83,14 @@ namespace LabberClient
                     if ((string)parameter == "cancel")
                         CurrentPage = createDBPage;
                     else if ((string)parameter == "next")
-                        CurrentPage = new AddStudentsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                        CurrentPage = addStudentsPage;
+                    break;
+
+                case nameof(AddStudentsPage):
+                    if ((string)parameter == "cancel")
+                        CurrentPage = addStudentsPage;
+                    else if ((string)parameter == "next")
+                        CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
                     break;
 
                 default:

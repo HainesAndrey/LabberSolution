@@ -35,7 +35,7 @@ namespace LabberClient
                 animation.To = 0;
                 animation.Duration = _duration;
                 animation.Completed += SlideCompleted;
-                frame.IsEnabled = false;
+                (DataContext as MainWindowVM).PageEnabledState = false;
                 frame.BeginAnimation(OpacityProperty, animation);
             }
             _allowDirectNavigation = false;
@@ -71,7 +71,7 @@ namespace LabberClient
                     animation.To = 1;
                     animation.Duration = _duration;
                     frame.BeginAnimation(OpacityProperty, animation);
-                    frame.IsEnabled = true;
+                    (DataContext as MainWindowVM).PageEnabledState = true;
                 });
         }
 

@@ -1,26 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows;
+﻿using LabberClient.VMStuff;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace LabberClient.Students
 {
-    /// <summary>
-    /// Логика взаимодействия для AddStudentsPage.xaml
-    /// </summary>
     public partial class AddStudentsPage : Page
     {
-        public AddStudentsPage()
+        public AddStudentsPage(ResponseHandler responseEvent, PageEnabledHandler pageEnabledEvent, LoadingStateHandler loadingStateEvent, CompleteStateHanlder completeStateEvent)
         {
             InitializeComponent();
+            DataContext = new AddStudentsPageVM(responseEvent, pageEnabledEvent, loadingStateEvent, completeStateEvent);
         }
     }
 }

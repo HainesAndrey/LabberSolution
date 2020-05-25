@@ -137,7 +137,7 @@
             IsEnabled="{Binding PageEnabledState}"
             Focusable="False"
             Grid.Row="1"
-            Margin="10 30"
+            Margin="15 30 15 15"
             Content="{Binding CurrentPage}"
             NavigationUIVisibility="Hidden"
             IsManipulationEnabled="False">
