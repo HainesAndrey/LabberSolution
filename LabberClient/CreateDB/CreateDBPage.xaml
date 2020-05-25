@@ -153,13 +153,13 @@
                             <Setter Property="ContextMenu" Value="{StaticResource RowMenu}"/>
                         </Style>
 
-                        <DataTemplate x:Key="MyDataTemplate">
+                        <!--<DataTemplate x:Key="MyDataTemplate">
                             <Border BorderBrush="Black" Background="Red"  BorderThickness="1,1,0,0" Margin="-6,-2,-6,-2">
                                 <StackPanel Margin="6,2,6,2">
                                     <TextBlock Text="{Binding}"/>
                                 </StackPanel>
                             </Border>
-                        </DataTemplate>
+                        </DataTemplate>-->
                     </ListView.Resources>
 
                     <ListView.ContextMenu>
