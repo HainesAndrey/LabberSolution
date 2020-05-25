@@ -5,190 +5,262 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     mc:Ignorable="d"
-    Title="StudentsTablePage">
+    Title="StudentsTablePage"
+    x:Name="page">
     <Grid
-        Background="WhiteSmoke">
+        HorizontalAlignment="Center"
+        Background="GhostWhite">
         <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition Height="80"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <ListView
-            SelectionMode="Single"
-            BorderBrush="Gray"
-            BorderThickness="1 1 1 0"
-            Background="WhiteSmoke"
-            ItemsSource="{Binding Items}"
-            SelectedItem="{Binding CurrentItem}"
-            ScrollViewer.VerticalScrollBarVisibility="Visible"
-            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-            ScrollViewer.CanContentScroll="False">
-            <ListView.Resources>
-                <ContextMenu
-                    x:Key="RowMenu" 
-                    DataContext="{Binding PlacementTarget.Tag,
-                        RelativeSource={RelativeSource Self}}">
-                    <MenuItem
-                        Header="Редактировать"
-                        Command="{Binding Change}"/>
-                    <MenuItem
-                        Header="Удалить"
-                        IsEnabled="{Binding DeleteSubjectEnabled}"
-                        Command="{Binding Delete}"/>
-                    <MenuItem
-                        Header="Удалить всё"
-                        Command="{Binding DeleteAll}"
-                        IsEnabled="{Binding DeleteAllEnabled}"/>
-                </ContextMenu>
-
-                <Style TargetType="{x:Type GridViewColumnHeader}">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="Background" Value="White"/>
-                    <Setter Property="Height" Value="25"/>
-                    <Setter Property="FontSize" Value="14"/>
-                    <Setter Property="IsHitTestVisible" Value="False"/>
-                </Style>
-
-                <Style TargetType="{x:Type ListViewItem}">
-                    <Setter Property="Tag" Value="{Binding ElementName=page, Path=DataContext}"/>
-                    <Setter Property="Foreground" Value="Black"/>
-                    <Setter Property="Height" Value="25"/>
-                    <Setter Property="FontSize" Value="14"/>
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="VerticalContentAlignment" Value="Stretch" />
-                    <Setter Property="ContextMenu" Value="{StaticResource RowMenu}"/>
-                </Style>
-            </ListView.Resources>
-
-            <ListView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem
-                        Header="Удалить всё"
-                        Command="{Binding DeleteAll}"
-                        IsEnabled="{Binding DeleteAllEnabled}"/>
-                </ContextMenu>
-            </ListView.ContextMenu>
-
-            <ListView.View>
-                <GridView
-                    AllowsColumnReorder="False">
-                    <GridViewColumn
-                        DisplayMemberBinding="{Binding Path=Surname}"
-                        Width="200"
-                        Header="Фамилия"/>
-
-                    <GridViewColumn
-                        DisplayMemberBinding="{Binding Path=FirstName}"
-                        Width="200"
-                        Header="Имя"/>
-
-                    <GridViewColumn
-                        DisplayMemberBinding="{Binding Path=SecondName}"
-                        Width="200"
-                        Header="Отчество"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
+        <GroupBox
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="Transparent"
+            BorderBrush="Gray">
+            <GroupBox.Header>
+                <TextBlock
+                    Text="Добавление групп:"
+                    FontSize="14"/>
+            </GroupBox.Header>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <ComboBox
+                    IsEditable="True"
+                    StaysOpenOnEdit="True" 
+                    VerticalAlignment="Center"
+                    Grid.Column="0"
+                    Margin="10 3"
+                    ItemsSource="{Binding Groups}"
+                    Text="{Binding GroupTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    SelectedValue="{Binding CurrentGroup, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    DisplayMemberPath="Title"
+                    Background="Transparent"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    ScrollViewer.CanContentScroll="False"
+                    FontSize="14">
+                </ComboBox>
+                <Button
+                    VerticalAlignment="Center"
+                    Grid.Column="1"
+                    Margin="10 3"
+                    Content="Добавить"
+                    Command="{Binding AddGroup}"
+                    IsEnabled="{Binding AddGroupEnabled}"/>
+                <Button
+                    VerticalAlignment="Center"
+                    Grid.Column="3"
+                    Margin="10 3"
+                    Content="Удалить"
+                    Command="{Binding DeleteGroup}"
+                    IsEnabled="{Binding DeleteGroupEnabled}"/>
+            </Grid>
+        </GroupBox>
 
         <Grid
-            Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="204"/>
-                <ColumnDefinition Width="200"/>
-                <ColumnDefinition Width="200"/>
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-
+            Grid.Row="1"
+            HorizontalAlignment="Center">
             <Grid.RowDefinitions>
-                <RowDefinition Height="30"/>
-                <RowDefinition Height="40"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <Border
-                Grid.ColumnSpan="6"
-                BorderBrush="Gray"
-                BorderThickness="1"/>
-
-            <Border
-                Background="WhiteSmoke"
-                Grid.Row="1"
-                Grid.ColumnSpan="6"
-                BorderBrush="Gray"
-                BorderThickness="1 0 1 1"/>
-
-            <Border
-                Background="GhostWhite"
-                Grid.ColumnSpan="6"
-                BorderBrush="Gray"
-                BorderThickness="1"/>
-
-            <Border
-                Grid.Column="1"
-                BorderBrush="Gray"
-                BorderThickness="1 0 0 0"/>
-
-            <Border
-                Grid.Column="2"
-                BorderBrush="Gray"
-                BorderThickness="1 0 0 0"/>
-
-            <Border
-                Grid.Column="3"
-                BorderBrush="Gray"
-                BorderThickness="1 0 0 0"/>
-
-            <TextBox
-                Margin="4 0 3 0"
-                VerticalAlignment="Center"
-                Text="{Binding Surname, UpdateSourceTrigger=PropertyChanged}"          
+            <TextBlock
+                Text="Добавление учащихся выбранной группы:"
                 FontSize="14"/>
-
-            <TextBox
-                Grid.Column="1"
-                Margin="4 0 3 0"
-                VerticalAlignment="Center"
-                Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}"
-                FontSize="14"/>
-
-            <TextBox
-                Grid.Column="2"
-                Margin="4 0 3 0"
-                VerticalAlignment="Center"
-                Text="{Binding SecondName, UpdateSourceTrigger=PropertyChanged}"
-                FontSize="14"/>
-
             <Grid
-                Grid.Row="1"
-                Grid.ColumnSpan="6"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center">
-                <StackPanel
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
-                    <Button
-                        Margin="10 0 5 0"
-                        VerticalAlignment="Center"
-                        Content="{Binding AddSaveBtnTitle}"
-                        FontSize="12"
-                        Command="{Binding Add, NotifyOnSourceUpdated=True}"
-                        IsEnabled="{Binding AddEnabled}"/>
+                Grid.Row="2"
+                IsEnabled="{Binding TableEnabled}">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="70"/>
+                </Grid.RowDefinitions>
 
-                    <Button
-                        Margin="5 0"
-                        VerticalAlignment="Center"
-                        Content="Очистить поля"
-                        FontSize="12"
-                        Command="{Binding Clear}"
-                        IsEnabled="{Binding ClearEnabled}"/>
+                <ListView
+                    SelectionMode="Single"
+                    BorderBrush="Gray"
+                    BorderThickness="1 1 1 0"
+                    Background="WhiteSmoke"
+                    ItemsSource="{Binding Items}"
+                    SelectedItem="{Binding CurrentItem}"
+                    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    ScrollViewer.CanContentScroll="False">
+                    <ListView.Resources>
+                        <ContextMenu
+                            x:Key="RowMenu" 
+                            DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                            <MenuItem
+                                Header="Редактировать"
+                                Command="{Binding Change}"/>
+                            <MenuItem
+                                Header="Удалить"
+                                IsEnabled="{Binding DeleteEnabled}"
+                                Command="{Binding Delete}"/>
+                            <MenuItem
+                                Header="Удалить всё"
+                                Command="{Binding DeleteAll}"
+                                IsEnabled="{Binding DeleteAllEnabled}"/>
+                        </ContextMenu>
 
-                    <Button
-                        Margin="5 0 10 0"
+                        <Style TargetType="{x:Type GridViewColumnHeader}">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Background" Value="White"/>
+                            <Setter Property="Height" Value="25"/>
+                            <Setter Property="FontSize" Value="14"/>
+                            <Setter Property="IsHitTestVisible" Value="False"/>
+                        </Style>
+
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="Tag" Value="{Binding ElementName=page, Path=DataContext}"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="Height" Value="25"/>
+                            <Setter Property="FontSize" Value="14"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                            <Setter Property="ContextMenu" Value="{StaticResource RowMenu}"/>
+                        </Style>
+                    </ListView.Resources>
+
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem
+                                Header="Удалить всё"
+                                Command="{Binding DeleteAll}"
+                                IsEnabled="{Binding DeleteAllEnabled}"/>
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+
+                    <ListView.View>
+                        <GridView
+                            AllowsColumnReorder="False">
+                            <GridViewColumn
+                                DisplayMemberBinding="{Binding Path=Surname}"
+                                Width="160"
+                                Header="Фамилия"/>
+
+                            <GridViewColumn
+                                DisplayMemberBinding="{Binding Path=FirstName}"
+                                Width="160"
+                                Header="Имя"/>
+
+                            <GridViewColumn
+                                DisplayMemberBinding="{Binding Path=SecondName}"
+                                Width="160"
+                                Header="Отчество"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+                <Grid
+                    Grid.Row="1"
+                    Background="WhiteSmoke">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="164"/>
+                        <ColumnDefinition Width="160"/>
+                        <ColumnDefinition Width="160"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="40"/>
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.ColumnSpan="6"
+                        BorderBrush="Gray"
+                        BorderThickness="1"/>
+
+                    <Border
+                        Background="WhiteSmoke"
+                        Grid.Row="1"
+                        Grid.ColumnSpan="4"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 1 1"/>
+
+                    <Border
+                        Background="GhostWhite"
+                        Grid.ColumnSpan="6"
+                        BorderBrush="Gray"
+                        BorderThickness="1"/>
+
+                    <Border
+                        Grid.Column="1"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 0 0"/>
+
+                    <Border
+                        Grid.Column="2"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 0 0"/>
+
+                    <Border
+                        Grid.Column="3"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 0 0"/>
+
+                    <TextBox
+                        Margin="4 0 3 0"
                         VerticalAlignment="Center"
-                        Content="Добавить из Excel"
-                        FontSize="12"
-                        Command="{Binding AddFromExcel}"/>
-                </StackPanel>
+                        Text="{Binding Surname, UpdateSourceTrigger=PropertyChanged}"          
+                        FontSize="14"/>
+
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="4 0 3 0"
+                        VerticalAlignment="Center"
+                        Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}"
+                        FontSize="14"/>
+
+                    <TextBox
+                        Grid.Column="2"
+                        Margin="4 0 3 0"
+                        VerticalAlignment="Center"
+                        Text="{Binding SecondName, UpdateSourceTrigger=PropertyChanged}"
+                        FontSize="14"/>
+
+                    <Grid
+                        Grid.Row="1"
+                        Grid.ColumnSpan="6"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                        <StackPanel
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                            <Button
+                                Margin="10 0 5 0"
+                                VerticalAlignment="Center"
+                                Content="{Binding AddSaveBtnTitle}"
+                                FontSize="12"
+                                Command="{Binding Add, NotifyOnSourceUpdated=True}"
+                                IsEnabled="{Binding AddEnabled}"/>
+
+                            <Button
+                                Margin="5 0"
+                                VerticalAlignment="Center"
+                                Content="Очистить поля"
+                                FontSize="12"
+                                Command="{Binding Clear}"
+                                IsEnabled="{Binding ClearEnabled}"/>
+
+                            <Button
+                                Margin="5 0 10 0"
+                                VerticalAlignment="Center"
+                                Content="Добавить из Excel"
+                                FontSize="12"
+                                Command="{Binding AddFromExcel}"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
             </Grid>
         </Grid>
     </Grid>
