@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <Folder Include="Workspace\AdminTab\UsersTable\" />
-    <Folder Include="Workspace\LabsTab\" />
     <Folder Include="Workspace\DebtsTab\" />
     <Folder Include="Workspace\ProfileTab\" />
   </ItemGroup>
