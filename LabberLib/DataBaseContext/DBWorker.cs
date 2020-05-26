@@ -151,7 +151,7 @@ namespace LabberLib.DataBaseContext
                 u.Property(x => x.Password).HasColumnType("varchar(15)").IsRequired();
                 u.Property(x => x.Surname).HasColumnType("varchar(15)").IsRequired();
                 u.Property(x => x.FirstName).HasColumnType("varchar(15)").IsRequired();
-                u.Property(x => x.SecondName).HasColumnType("varchar(15)").IsRequired();
+                u.Property(x => x.SecondName).HasColumnType("varchar(15)");
                 u.HasIndex(x => new { x.Surname, x.FirstName, x.SecondName }).IsUnique();
                 u.HasOne(x => x.Role).WithMany().HasForeignKey(x => x.RoleId).IsRequired();
             });
@@ -183,7 +183,7 @@ namespace LabberLib.DataBaseContext
                 st.ToTable("students");
                 st.Property(x => x.Surname).HasColumnType("varchar(15)").IsRequired();
                 st.Property(x => x.FirstName).HasColumnType("varchar(15)").IsRequired();
-                st.Property(x => x.SecondName).HasColumnType("varchar(15)").IsRequired();
+                st.Property(x => x.SecondName).HasColumnType("varchar(15)");
                 st.Property(x => x.SubGroup).HasColumnType("varchar(1)").IsRequired();
                 st.HasIndex(x => new { x.Surname, x.FirstName, x.SecondName, x.GroupId }).IsUnique();
                 st.HasOne(x => x.Group).WithMany().HasForeignKey(x => x.GroupId).IsRequired();

@@ -1,0 +1,39 @@
+﻿<Page
+    x:Class="LabberClient.Workspace.JournalsTab.JournalTableWrapper.JournalTableWrapperPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:journaltable="clr-namespace:LabberClient.Workspace.JournalsTab.JournalTable"
+    mc:Ignorable="d" 
+    Title="JournalTableWrapperPage">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <!--<TextBlock
+            Text="{Binding Title}"
+            TextWrapping="Wrap"
+            FontSize="14"
+            Foreground="DodgerBlue"
+            TextAlignment="Center"
+            HorizontalAlignment="Left">
+            <TextBlock.Effect>
+                <DropShadowEffect
+                    BlurRadius="10"У
+                    ShadowDepth="0"
+                    Opacity="0.2"/>
+            </TextBlock.Effect>
+        </TextBlock>-->
+
+        <Frame
+            Content="{Binding JournalTablePage}"/>
+        <!--<journaltable:JournalDataGrid
+            Labs="{Binding Labs}"
+            Marks="{Binding Marks}"/>-->
+    </Grid>
+</Page>

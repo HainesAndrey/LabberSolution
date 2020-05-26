@@ -1,4 +1,6 @@
 ﻿using LabberClient.VMStuff;
+using LabberClient.Workspace.JournalsTab.JournalTable;
+using LabberLib.DataBaseContext.Entities;
 using System.Windows.Controls;
 
 namespace LabberClient.Workspace.JournalsTab

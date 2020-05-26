@@ -14,7 +14,7 @@ namespace LabberLib.DataBaseContext.Entities
         public uint RoleId { get; set; } = 2;
         public Role Role { get; set; }
 
-        public User(uint roleId, string login, string password = null, string surname = null, string firstName = null, string secondName = null)
+        public User(uint roleId, string login, string surname, string firstName, string secondName = null, string password = null)
         {
             RoleId = roleId;
             Login = login;

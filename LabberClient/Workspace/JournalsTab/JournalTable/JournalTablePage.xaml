@@ -5,9 +5,72 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     mc:Ignorable="d" 
+    d:DesignHeight="450" d:DesignWidth="800"
     Title="JournalTablePage">
 
     <Grid>
-        
+        <DataGrid
+            x:Name="table"
+            IsReadOnly="True"
+            HeadersVisibility="Column"
+            CanUserReorderColumns="False"
+            CanUserResizeColumns="False"
+            FrozenColumnCount="3"
+            SelectionMode="Single"
+            SelectionUnit="Cell"
+            BorderThickness="0"
+            HorizontalGridLinesBrush="LightGray"
+            VerticalGridLinesBrush="LightGray"
+            RowBackground="GhostWhite"
+            AlternatingRowBackground="WhiteSmoke"
+            VerticalScrollBarVisibility="Visible"
+            HorizontalScrollBarVisibility="Visible"
+            SelectedCellsChanged="DataGrid_SelectedCellsChanged"
+            ItemsSource="{Binding DataTable.DefaultView}">
+            <!--<DataGrid.Resources>
+                <Style TargetType="DataGridColumnHeader">
+                    --><!--<Style.Triggers>
+                        <Trigger Property="Content" Value="№">
+                            <Setter Property="TextBlock.TextAlignment" Value="Right"/>
+                        </Trigger>
+
+                        <Trigger Property="Content" Value="ФИО">
+                            <Setter Property="TextBlock.TextAlignment" Value="Left"/>
+                        </Trigger>
+
+                        <Trigger Property="Content" Value="Д">
+                            <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                        </Trigger>
+                    </Style.Triggers>--><!--
+                    <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                </Style>
+
+                --><!--<Style TargetType="DataGridCell">
+                    <Setter Property="TextBlock.VerticalAlignment" Value="Center"/>
+                    <Style.Triggers>
+                        <Trigger Property="DataGridColumn.DisplayIndex" Value="0">
+                            <Setter Property="TextBlock.TextAlignment" Value="Right"/>
+                        </Trigger>
+
+                        <Trigger Property="DataGridColumn.DisplayIndex" Value="1">
+                            <Setter Property="TextBlock.TextAlignment" Value="Left"/>
+                        </Trigger>
+
+                        <Trigger Property="DataGridColumn.DisplayIndex" Value="2">
+                            <Setter Property="TextBlock.TextAlignment" Value="Left"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>--><!--
+            </DataGrid.Resources>-->
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem
+                        Header="Зач/незач"/>
+                    
+                    <MenuItem
+                        Header="Доп. информация"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+        </DataGrid>
     </Grid>
 </Page>

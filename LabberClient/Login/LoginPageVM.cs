@@ -3,6 +3,7 @@ using LabberLib.DataBaseContext;
 using Microsoft.Win32;
 using MvvmCross.Commands;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LabberClient.Login
 {
@@ -42,16 +43,41 @@ namespace LabberClient.Login
 
         }
 
-        private void LogInAction(string psw)
+        private async void LogInAction(string psw)
         {
             if (FileName == "\"Не выбран\"")
             {
                 if (DBWorker.CredName == Login && DBWorker.CredPsw == psw)
                     InvokeCompleteStateEvent("createDB");
+                else
+                    InvokeResponseEvent(ResponseType.Bad, "Выберите файл базы данных");
             }
             else
-                DBWorker.UserId = db.Users.FirstOrDefault(x => x.Login == Login && x.Password == psw)?.Id ?? 0;
-        }
+            {
+                uint userid = 0;
+                InvokePageEnabledEvent(false);
+                InvokeLoadingStateEvent(true);
+                InvokeResponseEvent(ResponseType.Neutral, "Подождите...");
+                await Task.Run(() =>
+                {
+                    using (db = new DBWorker())
+                    {
+                        userid = db.Users.FirstOrDefault(x => x.Login == Login && x.Password == psw)?.Id ?? 0;
+                    }
+                });
+                
+                InvokePageEnabledEvent(true);
+                InvokeLoadingStateEvent(false);
 
+                if (userid == 0)
+                    InvokeResponseEvent(ResponseType.Bad, "Неверный логин или пароль");
+                else
+                {
+                    DBWorker.UserId = userid; 
+                    InvokeResponseEvent(ResponseType.Good, "Авторизация прошла успешно");
+                    InvokeCompleteStateEvent("next");
+                }
+            }
+        }
     }
 }

@@ -33,10 +33,13 @@ namespace LabberClient.Students
 
         private void NextBody()
         {
-            db = new DBWorker();
-            db.Groups.AddRange(Groups);
-            db.Students.AddRange(Students);
-            db.SaveChanges();
+            using (db = new DBWorker())
+            {
+                db.Groups.AddRange(Groups);
+                db.Students.AddRange(Students);
+                db.SaveChanges();
+            }
+            InvokeCompleteStateEvent("next");
         }
     }
 }

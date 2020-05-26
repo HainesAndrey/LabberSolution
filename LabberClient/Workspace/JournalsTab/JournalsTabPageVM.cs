@@ -1,10 +1,12 @@
 ﻿using LabberClient.VMStuff;
-using LabberClient.Workspace.JournalsTab.JournalTable;
+using LabberClient.Workspace.JournalsTab.JournalTableWrapper;
+using LabberLib.DataBaseContext;
 using LabberLib.DataBaseContext.Entities;
 using MvvmCross.Commands;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace LabberClient.Workspace.JournalsTab
@@ -13,9 +15,11 @@ namespace LabberClient.Workspace.JournalsTab
     {
         private bool treeEnabled = true;
         private bool loadingState;
+        private Visibility filterEnabled;
 
         public bool TreeEnabled { get => treeEnabled; set { treeEnabled = value; RaisePropertyChanged("TreeEnabled"); } }
         public bool LoadingState { get => loadingState; set { loadingState = value; RaisePropertyChanged("LoadingState"); } }
+        public Visibility FilterEnabled { get => filterEnabled; set { filterEnabled = value; RaisePropertyChanged("FilterEnabled"); } }
 
         public MvxCommand GroupByGroups { get; set; }
         public MvxCommand GroupBySubjects { get; set; }
@@ -31,30 +35,37 @@ namespace LabberClient.Workspace.JournalsTab
         public JournalsTabPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            Journals = new List<Journal>()
+            //Journals = new List<Journal>()
+            //{
+            //    new Journal(1, 1, 1, "1")
+            //    {
+            //        Id = 1,
+            //        Group = new Group("П-1722") { Id = 1 },
+            //        Subject = new Subject("БДиСУБД", "Базы данных и сисетмы управления базами данных") { Id = 1 },
+            //        User = new User() { Surname = "Доманова", FirstName = "Юлия", SecondName = "Анатольенва", Id = 1 }
+            //    },
+            //    new Journal(2, 2, 2, "1")
+            //    {
+            //        Id = 2,
+            //        Group = new Group("П-42") { Id = 2 },
+            //        Subject = new Subject("ПООГИ", "Программное обеспечение информационных технологий") { Id = 2 },
+            //        User = new User() { Surname = "Меньшикова", FirstName = "Марина", SecondName = "Валерьвена", Id = 2 }
+            //    },
+            //    new Journal(1, 3, 3, "2")
+            //    {
+            //        Id = 3,
+            //        Group = new Group("П-1722") { Id = 1 },
+            //        Subject = new Subject("СиАОД", "Структуры и алогритмы обработки данных") { Id = 3 },
+            //        User = new User() { Surname = "Дроздова", FirstName = "Юлия", SecondName = "Анатольенва", Id = 3 }
+            //    },
+            //};
+
+            using (db = new DBWorker())
             {
-                new Journal(1, 1, 1, "1")
-                {
-                    Id = 1,
-                    Group = new Group("П-1722") { Id = 1 },
-                    Subject = new Subject("БД", "") { Id = 1 },
-                    User = new User() { Surname = "Доманова", FirstName = "Юлия", SecondName = "Анатольенва", Id = 1 }
-                },
-                new Journal(2, 2, 2, "1")
-                {
-                    Id = 2,
-                    Group = new Group("П-42") { Id = 2 },
-                    Subject = new Subject("ПООГИ", "") { Id = 2 },
-                    User = new User() { Surname = "Меньшикова", FirstName = "Марина", SecondName = "Валерьвена", Id = 2 }
-                },
-                new Journal(1, 3, 3, "2")
-                {
-                    Id = 3,
-                    Group = new Group("П-1722") { Id = 1 },
-                    Subject = new Subject("СиАОД", "") { Id = 3 },
-                    User = new User() { Surname = "Дроздова", FirstName = "Юлия", SecondName = "Анатольенва", Id = 3 }
-                },
-            };
+                var isAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;
+                FilterEnabled = isAdmin ? Visibility.Collapsed : Visibility.Visible;
+                Journals = db.Journals.ToList();
+            }
 
 
             GroupByGroups = new MvxCommand(GroupByGroupsBody);
@@ -79,7 +90,7 @@ namespace LabberClient.Workspace.JournalsTab
                     Header = GetJournalHeader(journal),
                     Content = new Frame()
                     {
-                        Content = new JournalTablePage(journal, InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent)
+                        Content = new JournalTableWrapperPage(journal, InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent)
                     }
                 });
         }

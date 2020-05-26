@@ -14,6 +14,8 @@
         public uint Journal_LabId { get; set; }
         public Journal_Lab Journal_Lab { get; set; }
 
+        public Mark() { }
+
         public Mark(uint studentId, uint journal_LabId, string practiceState, string theoryState, string date, bool wasntOnLab = true)
         {
             StudentId = studentId;

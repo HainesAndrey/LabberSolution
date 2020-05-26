@@ -12,6 +12,8 @@
         public uint LabId { get; set; }
         public Lab Lab { get; set; }
 
+        public Journal_Lab() { }
+
         public Journal_Lab(uint journalId, uint labId, string date, bool hasTheory)
         {
             JournalId = journalId;

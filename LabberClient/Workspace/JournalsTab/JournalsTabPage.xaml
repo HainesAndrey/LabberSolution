@@ -17,15 +17,10 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <Grid
+        <DockPanel
             Margin="5 10 0 5">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="70"/>
-                <RowDefinition Height="75"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            
             <GroupBox
+                DockPanel.Dock="Top"
                 Margin="0 0 0 5"
                 Header="Группировка по:">
                 <WrapPanel
@@ -35,12 +30,12 @@
                         Margin="2 3"
                         IsChecked="True"
                         Command="{Binding GroupByGroups}"/>
-                    
+
                     <RadioButton
                         Content="Предметам"
                         Margin="2 3"
                         Command="{Binding GroupBySubjects}"/>
-                    
+
                     <RadioButton
                         Content="Преподавателям"
                         Margin="2 3"
@@ -49,16 +44,18 @@
             </GroupBox>
 
             <GroupBox
+                DockPanel.Dock="Top"
                 Grid.Row="1"
                 Margin="0 0 0 10"
-                Header="Фильтрация:">
+                Header="Фильтрация:"
+                Visibility="{Binding FilterEnabled}">
                 <StackPanel>
                     <RadioButton
                         Content="Мои журналы"
                         Margin="2 3"
                         IsChecked="True"
                         Command="{Binding FilterByOwn}"/>
-                    
+
                     <RadioButton
                         Content="Все журналы"
                         Margin="2 3"
@@ -67,6 +64,7 @@
             </GroupBox>
 
             <GroupBox
+                DockPanel.Dock="Top"
                 Grid.Row="2"
                 Header="Дерево журналов:">
                 <Grid>
@@ -116,7 +114,7 @@
                     </TreeView>
                 </Grid>
             </GroupBox>
-        </Grid>
+        </DockPanel>
 
         <Grid
             Grid.Column="1">

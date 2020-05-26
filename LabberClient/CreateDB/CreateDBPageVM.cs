@@ -154,6 +154,7 @@ namespace LabberClient.CreateDB
                     DBWorker.UserId = 0;
                     db = new DBWorker(true);
                     db.Users.AddRange(Users.Select(x => x.User).Where(x => !db.Users.ToList().Exists(y => y.Login == x.Login)));
+                    db.Users.Add(new User(1, DBWorker.CredName, "Admin", "ПОИТ") { Password = DBWorker.CredPsw });
                     db.SaveChanges();
 
                     InvokeResponseEvent(ResponseType.Good, "База данных успешно создана. Пользователи добавлены в базу данных");
@@ -162,7 +163,6 @@ namespace LabberClient.CreateDB
                 InvokePageEnabledEvent(true);
                 InvokeCompleteStateEvent("next");
             }
-            
         }
 
         private void CancelBody()

@@ -53,9 +53,9 @@ namespace LabberClient
             //createDBPage = new CreateDBPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
             //addSubjectsPage = new AddSubjectsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
 
-            //CurrentPage = new LoginPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+            CurrentPage = new LoginPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
             //CurrentPage = new AddStudentsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent); ;
-            CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+            //CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
         }
 
         private void MainWindowVM_CompleteStateEvent(object parameter)
@@ -63,39 +63,62 @@ namespace LabberClient
             switch (CurrentPage.GetType().Name)
             {
                 case nameof(LoginPage):
-                    if ((string)parameter == "createDB")
+                    switch ((string)parameter)
                     {
-                        createDBPage = new CreateDBPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
-                        addSubjectsPage = new AddSubjectsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
-                        addStudentsPage = new AddStudentsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
-                        CurrentPage = createDBPage;
+                        case "createDB":
+                            createDBPage = new CreateDBPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                            addSubjectsPage = new AddSubjectsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                            addStudentsPage = new AddStudentsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                            CurrentPage = createDBPage;
+                            break;
+                        case "next":
+                            CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                            break;
                     }
                     break;
 
                 case nameof(CreateDBPage):
-                    if ((string)parameter == "cancel")
-                        CurrentPage = new LoginPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
-                    else if ((string)parameter == "next")
-                        CurrentPage = addSubjectsPage;
+                    switch ((string)parameter)
+                    {
+                        case "cancel":
+                            CurrentPage = new LoginPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                            break;
+
+                        case "next":
+                            CurrentPage = addSubjectsPage;
+                            break;
+                    }   
                     break;
 
                 case nameof(AddSubjectsPage):
-                    if ((string)parameter == "cancel")
-                        CurrentPage = createDBPage;
-                    else if ((string)parameter == "next")
-                        CurrentPage = addStudentsPage;
+                    switch ((string)parameter)
+                    {
+                        case "cancel":
+                            CurrentPage = createDBPage;
+                            break;
+
+                        case "next":
+                            CurrentPage = addStudentsPage;
+                            break;
+                    }
                     break;
 
                 case nameof(AddStudentsPage):
-                    if ((string)parameter == "cancel")
-                        CurrentPage = addStudentsPage;
-                    else if ((string)parameter == "next")
-                        CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                    switch ((string)parameter)
+                    {
+                        case "cancel":
+                            CurrentPage = addStudentsPage;
+                            break;
+
+                        case "next":
+                            CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                            break;
+                    }
                     break;
 
-                default:
-                    CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
-                    break;
+                //default:
+                //    CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                //    break;
             }   
         }
 
