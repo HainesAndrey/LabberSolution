@@ -20,24 +20,32 @@
             BorderThickness="0">
             <TabItem
                 Header="Журналы">
-                <Frame Content="{Binding JournalsTabPage}"/>
+                <Frame
+                    Margin="5 10 5 5"
+                    Content="{Binding JournalsTabPage}"/>
             </TabItem>
             
             <TabItem
                 Visibility="{Binding LabsTabPageVisibility}"
                 Header="Лабораторные работы">
-                <Frame Content="{Binding LabsTabPage}"/>
+                <Frame
+                    Margin="5 10 5 5"
+                    Content="{Binding LabsTabPage}"/>
             </TabItem>
             
             <TabItem
                 Header="Задолженности">
-                <Frame Content="{Binding DebtsTabPage}"/>
+                <Frame
+                    Margin="5 10 5 5"
+                    Content="{Binding DebtsTabPage}"/>
             </TabItem>
             
             <TabItem
                 Visibility="{Binding AdminTabPageVisibility}"
                 Header="Администратор">
-                <Frame Content="{Binding AdminTabPage}"/>
+                <Frame
+                    Margin="5 10 5 5"
+                    Content="{Binding AdminTabPage}"/>
             </TabItem>
         </TabControl>
     </Grid>

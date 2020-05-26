@@ -2,6 +2,7 @@
 using LabberClient.Workspace.JournalsTab.JournalTableWrapper;
 using LabberLib.DataBaseContext;
 using LabberLib.DataBaseContext.Entities;
+using Microsoft.EntityFrameworkCore;
 using MvvmCross.Commands;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -64,7 +65,7 @@ namespace LabberClient.Workspace.JournalsTab
             {
                 var isAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;
                 FilterEnabled = isAdmin ? Visibility.Collapsed : Visibility.Visible;
-                Journals = db.Journals.ToList();
+                Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList();
             }
 
 

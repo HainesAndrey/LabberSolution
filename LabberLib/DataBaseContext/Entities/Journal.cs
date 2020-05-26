@@ -14,6 +14,8 @@
         public uint UserId { get; set; }
         public User User { get; set; }
 
+        public Journal() { }
+
         public Journal(uint groupId, uint subjectId, uint userId, string subGroup)
         {
             GroupId = groupId;

@@ -88,11 +88,10 @@ namespace LabberLib.DataBaseContext
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var conn = new SqliteConnection($"Filename={FilePath}");
-            conn.Open();
-
-            var command = conn.CreateCommand();
-            command.CommandText = $"PRAGMA password = '{dbpsw}';";
-            command.ExecuteNonQuery();
+            //conn.Open();
+            //var command = conn.CreateCommand();
+            //command.CommandText = $"PRAGMA password = '{dbpsw}';";
+            //command.ExecuteNonQuery();
 
             optionsBuilder.UseSqlite(conn);
         }

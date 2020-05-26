@@ -1,4 +1,5 @@
 ﻿using LabberClient.VMStuff;
+using LabberClient.Workspace.AdminTab;
 using LabberClient.Workspace.JournalsTab;
 using LabberLib.DataBaseContext;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace LabberClient.Workspace
         public JournalsTabPage JournalsTabPage { get; set; }
         public int LabsTabPage { get; set; }
         public int DebtsTabPage { get; set; }
-        public int AdminTabPage { get; set; }
+        public AdminTabPage AdminTabPage { get; set; }
 
         public Visibility LabsTabPageVisibility { get => labsTabPageVisibility; set { labsTabPageVisibility = value; RaisePropertyChanged("LabsTabPageVisibility"); } }
         public Visibility AdminTabPageVisibility { get => adminTabPageVisibility; set { adminTabPageVisibility = value; RaisePropertyChanged("AdminTabPageVisibility"); } }
@@ -23,7 +24,10 @@ namespace LabberClient.Workspace
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
             JournalsTabPage = new JournalsTabPage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
+            AdminTabPage = new AdminTabPage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
+
             InvokeResponseEvent(ResponseType.Good, "Добро пожаловать");
+
             using (db = new DBWorker())
             {
                 var isAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;

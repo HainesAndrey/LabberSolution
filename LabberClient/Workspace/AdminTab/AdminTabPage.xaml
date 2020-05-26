@@ -8,6 +8,35 @@
     Title="AdminTabPage">
 
     <Grid>
-        
+        <TabControl
+            FontSize="14"
+            Background="GhostWhite"
+            BorderThickness="1"
+            BorderBrush="LightGray">
+            <TabItem
+                Header="Пользователи">
+                <Frame Content="{Binding UsersTablePage}"/>
+            </TabItem>
+
+            <TabItem
+                Header="Дисциплины">
+                <Frame Content="{Binding SubjectsTablePage}"/>
+            </TabItem>
+
+            <TabItem
+                Header="Группы и учащиеся">
+                <Frame Content="{Binding StudentsTablePage}"/>
+            </TabItem>
+
+            <TabItem
+                Header="Журналы">
+                <Frame Content="{Binding JournalsCreaterPage}"/>
+            </TabItem>
+
+            <TabItem
+                Header="Профиль">
+                <Frame Content="{Binding ProfilePage}"/>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Page>
