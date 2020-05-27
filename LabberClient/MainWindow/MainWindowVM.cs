@@ -107,7 +107,7 @@ namespace LabberClient
                     switch ((string)parameter)
                     {
                         case "cancel":
-                            CurrentPage = addStudentsPage;
+                            CurrentPage = addSubjectsPage;
                             break;
 
                         case "next":

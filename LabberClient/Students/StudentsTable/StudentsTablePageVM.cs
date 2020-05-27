@@ -1,5 +1,7 @@
 ﻿using LabberClient.VMStuff;
+using LabberLib.DataBaseContext;
 using LabberLib.DataBaseContext.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Win32;
 using MvvmCross.Commands;
 using OfficeOpenXml;
@@ -133,11 +135,29 @@ namespace LabberClient.Students.StudentsTable
             AddFromExcel = new MvxCommand(AddFromExcelBody);
         }
 
+        private void Refresh(DBWorker db, uint groupid)
+        {
+            Groups.Clear();
+            db.Groups.ToList().ForEach(x => Groups.Add(x));
+            AllStudents = db.Students.Include(x => x.Group).ToList();
+            Items.Clear();
+            AllStudents.Where(x => x.GroupId == groupid).ToList().ForEach(x => Items.Add(x));
+            GroupTitle = Groups.FirstOrDefault(x => x.Id == groupid)?.Title ?? "";
+        }
+
         private void DeleteGroupBody()
         {
-            Groups.Remove(Groups.First(x => x.Title == GroupTitle));
-            AllStudents.RemoveAll(x => x.Group?.Title == GroupTitle);
+            using (db = new DBWorker())
+            {
+                db.Groups.Remove(Groups.First(x => x.Title == GroupTitle));
+                db.SaveChanges();
+                Refresh(db, CurrentGroup.Id);
+            }
+            
+            //Students.Remove(x => x.Group?.Title == GroupTitle);
             GroupTitle = "";
+            //db.Groups.Remove = Groups;
+            //db.Students = AllStudents;
             InvokeResponseEvent(ResponseType.Good, "Группа успешно удалена");
         }
 
@@ -145,7 +165,13 @@ namespace LabberClient.Students.StudentsTable
         {
             if (GroupTitle != "" && !Groups.ToList().Exists(x => x.Title == GroupTitle))
             {
-                Groups.Add(new Group(GroupTitle));
+                using (db = new DBWorker())
+                {
+                    db.Groups.Add(new Group(GroupTitle));
+                    db.SaveChanges();
+                    CurrentGroup = db.Groups.First(x => x.Title == GroupTitle);
+                    Refresh(db, CurrentGroup.Id);
+                }
                 CurrentGroup = Groups.First(x => x.Title == GroupTitle);
                 InvokeResponseEvent(ResponseType.Good, "Группа успешно добавлена");
             }
@@ -153,7 +179,12 @@ namespace LabberClient.Students.StudentsTable
 
         private void DeleteAllBody()
         {
-            Items.Clear();
+            using (db = new DBWorker())
+            {
+                db.Students.RemoveRange(Items);
+                db.SaveChanges();
+                Refresh(db, CurrentGroup.Id);
+            }
             DeleteAllEnabled = false;
         }
 
@@ -166,7 +197,12 @@ namespace LabberClient.Students.StudentsTable
 
         private void DeleteBody()
         {
-            Items.Remove(Items.First(x => x.Surname == Surname && x.FirstName == FirstName && x.SecondName == SecondName));
+            using (db = new DBWorker())
+            {
+                db.Students.Remove(Items.First(x => x.Surname == CurrentItem.Surname && x.FirstName == CurrentItem.FirstName && x.SecondName == CurrentItem.SecondName));
+                db.SaveChanges();
+                Refresh(db, CurrentGroup.Id);
+            }
             if (Items.Count == 0)
                 DeleteAllEnabled = false;
         }
@@ -189,16 +225,29 @@ namespace LabberClient.Students.StudentsTable
                     InvokeResponseEvent(ResponseType.Bad, "Такой учащийся уже добавлен");
                 else
                 {
-                    AllStudents.Add(new Student(CurrentGroup.Id, Surname, FirstName, SecondName, "") { Group = CurrentGroup });
-                    Items.Add(new Student(CurrentGroup.Id, Surname, FirstName, SecondName, "") { Group = CurrentGroup });
+                    using (db = new DBWorker())
+                    {
+                        db.Students.Add(new Student(CurrentGroup.Id, Surname, FirstName, SecondName, ""));
+                        db.SaveChanges();
+                        Refresh(db, CurrentGroup.Id);
+                    }
                     DeleteAllEnabled = true;
                     InvokeResponseEvent(ResponseType.Good, "Учащийся успешно добавлен");
                 }
             }
             else
             {
-                var index = Items.IndexOf(CurrentItem);
-                Items[index] = new Student(CurrentGroup.Id, Surname, FirstName, SecondName, "") { Group = CurrentGroup };
+                using (db = new DBWorker())
+                {
+                    var stud = db.Students.First(x => x.GroupId == CurrentGroup.Id && x.Surname == CurrentItem.Surname && x.FirstName == CurrentItem.FirstName && x.SecondName == CurrentItem.SecondName);
+                    stud.Surname = Surname;
+                    stud.FirstName = FirstName;
+                    stud.SecondName = SecondName;
+                    db.SaveChanges();
+                    Refresh(db, CurrentGroup.Id);
+                }
+                //var index = Items.IndexOf(CurrentItem);
+                //Items[index] = new Student(CurrentGroup.Id, Surname, FirstName, SecondName, "") { Group = CurrentGroup };
                 AddSaveBtnTitle = "Добавить";
                 InvokeResponseEvent(ResponseType.Good, "Информация об учащемся успешно отредактирована");
                 Clear.Execute();
@@ -251,18 +300,22 @@ namespace LabberClient.Students.StudentsTable
                     InvokeResponseEvent(ResponseType.Bad, "Некорректный шаблон файла");
                 else
                 {
-                    for (int i = 0; i < arr.GetLength(0); i++)
-                    {
-                        var newstudent = new Student(CurrentGroup.Id, arr[i, 0].ToString(), arr[i, 1].ToString(), arr[i, 2].ToString(), "") { Group = CurrentGroup };
-                        if (!Items.ToList().Exists(x => x.Surname == newstudent.Surname && x.FirstName == newstudent.FirstName && x.SecondName == newstudent.SecondName))
-                        {
-                            Items.Add(newstudent);
-                            AllStudents.Add(newstudent);
-                        }
-                            
-                    }
+                    
                     //AllStudents.AddRange(Items.Where(x => x.GroupId));
                     //AllStudents = AllStudents.Distinct().ToList();
+                    using (db = new DBWorker())
+                    {
+                        for (int i = 0; i < arr.GetLength(0); i++)
+                        {
+                            var newstudent = new Student(CurrentGroup.Id, arr[i, 0].ToString(), arr[i, 1].ToString(), arr[i, 2].ToString(), "");
+                            if (!Items.ToList().Exists(x => x.Surname == newstudent.Surname && x.FirstName == newstudent.FirstName && x.SecondName == newstudent.SecondName))
+                            {
+                                db.Students.Add(newstudent);
+                            }
+                        }
+                        db.SaveChanges();
+                        Refresh(db, CurrentGroup.Id);
+                    }
                     DeleteAllEnabled = true;
                     InvokeResponseEvent(ResponseType.Good, "Дисциплины успешно добавлены из файла");
                 }

@@ -4,10 +4,9 @@ using LabberLib.DataBaseContext;
 using LabberLib.DataBaseContext.Entities;
 using MvvmCross.Commands;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Data;
 using System.Windows.Forms;
 
 namespace LabberClient.CreateDB
@@ -66,7 +65,7 @@ namespace LabberClient.CreateDB
             Users = (UsersTablePage.DataContext as UsersTablePageVM).Users;
             if (FileName == "")
                 InvokeResponseEvent(ResponseType.Bad, "Укажите название файла новой базы данных");
-            else if (FilePath == "")
+            else if (FullPath == "")
                 InvokeResponseEvent(ResponseType.Bad, "Укажите путь к файлу новой базы данных");
             else if (Users.Count == 0)
                 InvokeResponseEvent(ResponseType.Bad, "Добавьте пользователей базы данных");
@@ -74,25 +73,33 @@ namespace LabberClient.CreateDB
                 InvokeResponseEvent(ResponseType.Bad, "Добавьте хотя бы одного администратора");
             else
             {
-                InvokeResponseEvent(ResponseType.Neutral, "Подождите...");
-                InvokePageEnabledEvent(false);
-                InvokeLoadingStateEvent(true);
-                await Task.Run(() =>
+                if (File.Exists(FullPath))
                 {
-                    DBWorker.FilePath = FullPath;
-                    db = new DBWorker(true);
-                    
-                    db.Users.Add(new User(1, DBWorker.CredName, "Admin", "ПОИТ") { Password = DBWorker.CredPsw });
-                    db.Users.AddRange(Users.Select(x => x.User).Where(x => !db.Users.ToList().Exists(y => y.Login == x.Login)));
-                    db.SaveChanges();
+                    InvokeResponseEvent(ResponseType.Bad, "Файл базы данных в данном каталоге уже существует");
+                }
+                else
+                {
+                    InvokeResponseEvent(ResponseType.Neutral, "Подождите...");
+                    InvokePageEnabledEvent(false);
+                    InvokeLoadingStateEvent(true);
+                    await Task.Run(() =>
+                    {
+                        DBWorker.FilePath = FullPath;
+                        db = new DBWorker(true);
 
-                    DBWorker.UserId = db.Users.First(x => x.Login == DBWorker.CredName).Id;
+                        db.Users.Add(new User(1, DBWorker.CredName, "Admin", "ПОИТ") { Password = DBWorker.CredPsw });
+                        db.Users.AddRange(Users.Select(x => x.User).Where(x => !db.Users.ToList().Exists(y => y.Login == x.Login)));
+                        db.SaveChanges();
 
-                    InvokeResponseEvent(ResponseType.Good, "База данных успешно создана. Пользователи добавлены в базу данных");
-                });
-                InvokeLoadingStateEvent(false);
-                InvokePageEnabledEvent(true);
-                InvokeCompleteStateEvent("next");
+                        DBWorker.UserId = db.Users.First(x => x.Login == DBWorker.CredName).Id;
+
+                        InvokeResponseEvent(ResponseType.Good, "База данных успешно создана. Пользователи добавлены в базу данных");
+                    });
+                    InvokeLoadingStateEvent(false);
+                    InvokePageEnabledEvent(true);
+                    InvokeCompleteStateEvent("next");
+                }
+                
             }
         }
 
@@ -113,7 +120,10 @@ namespace LabberClient.CreateDB
             switch (folderDialog.ShowDialog())
             {
                 case DialogResult.OK:
-                    FilePath = folderDialog.SelectedPath;
+                    if (File.Exists($"{folderDialog.SelectedPath}\\{FileName}.db"))
+                        InvokeResponseEvent(ResponseType.Bad, "Файл базы данных в данном каталоге уже существует");
+                    else
+                        FilePath = folderDialog.SelectedPath;
                     break;
             }
         }
