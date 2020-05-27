@@ -1,7 +1,7 @@
 ﻿using LabberClient.VMStuff;
 using System.Windows.Controls;
 
-namespace LabberClient.Workspace.AdminTab.UsersTable
+namespace LabberClient.Workspace.AdminTab.UsersTab
 {
     public partial class UsersTabPage : Page
     {

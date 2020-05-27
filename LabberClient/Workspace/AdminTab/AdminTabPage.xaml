@@ -15,22 +15,38 @@
             BorderBrush="LightGray">
             <TabItem
                 Header="Пользователи">
-                <Frame Content="{Binding UsersTabPage}"/>
+                <Frame
+                    Focusable="False"
+                    NavigationUIVisibility="Hidden"
+                    IsManipulationEnabled="False"
+                    Content="{Binding UsersTabPage}"/>
             </TabItem>
 
             <TabItem
                 Header="Дисциплины">
-                <Frame Content="{Binding SubjectsTablePage}"/>
+                <Frame
+                    Focusable="False"
+                    NavigationUIVisibility="Hidden"
+                    IsManipulationEnabled="False"
+                    Content="{Binding SubjectsTabPage}"/>
             </TabItem>
 
             <TabItem
                 Header="Группы и учащиеся">
-                <Frame Content="{Binding StudentsTablePage}"/>
+                <Frame
+                    Focusable="False"
+                    NavigationUIVisibility="Hidden"
+                    IsManipulationEnabled="False"
+                    Content="{Binding StudentsTabPage}"/>
             </TabItem>
 
             <TabItem
                 Header="Журналы">
-                <Frame Content="{Binding JournalsCreaterPage}"/>
+                <Frame
+                    Focusable="False"
+                    NavigationUIVisibility="Hidden"
+                    IsManipulationEnabled="False"
+                    Content="{Binding JournalsCreaterPage}"/>
             </TabItem>
 
             <!--<TabItem

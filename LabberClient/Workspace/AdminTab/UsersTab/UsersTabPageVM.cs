@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LabberClient.Workspace.AdminTab.UsersTable
+namespace LabberClient.Workspace.AdminTab.UsersTab
 {
     public class UsersTabPageVM : LabberVMBase
     {
