@@ -56,7 +56,6 @@ namespace LabberClient.Subjects.SubjectsTable
         bool CheckRequiredFields() => ShortTitle != "" && LongTitle != "";
         bool IsAllFieldAreEmpty() => ShortTitle == "" && LongTitle == "";
 
-
         public ObservableCollection<Subject> Items { get; set; } = new ObservableCollection<Subject>();
         public MvxCommand Add { get; set; }
         public MvxCommand Change { get; set; }
@@ -119,7 +118,7 @@ namespace LabberClient.Subjects.SubjectsTable
         {
             using (db = new DBWorker())
             {
-                db.Subjects.Remove(db.Subjects.First(x => x.ShortTitle == ShortTitle));
+                db.Subjects.Remove(db.Subjects.First(x => x.ShortTitle == CurrentItem.ShortTitle));
             }
             Refresh();
         }

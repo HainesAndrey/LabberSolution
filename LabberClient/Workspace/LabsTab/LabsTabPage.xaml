@@ -188,7 +188,7 @@
                         <GridView
                             AllowsColumnReorder="False">
                             <GridViewColumn
-                                DisplayMemberBinding="{Binding Path=Number}"
+                                DisplayMemberBinding="{Binding Path=Lab.Number}"
                                 Header="Номер"
                                 Width="100"/>
 
@@ -248,11 +248,12 @@
                         Text="{Binding Number, UpdateSourceTrigger=PropertyChanged}"          
                         FontSize="14"/>
 
-                    <TextBox
+                    <DatePicker
                         Grid.Column="1"
                         Margin="4 0 3 0"
                         VerticalAlignment="Center"
-                        Text="{Binding Date, UpdateSourceTrigger=PropertyChanged}"
+                        
+                        Text="{Binding Date, StringFormat=dd-MM-yyyy, UpdateSourceTrigger=PropertyChanged}"
                         FontSize="14"/>
 
                     <Grid
