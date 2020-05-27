@@ -1,6 +1,9 @@
 ﻿using LabberLib.DataBaseContext.Entities;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.IO;
+using System.Linq;
 
 namespace LabberLib.DataBaseContext
 {
@@ -10,7 +13,7 @@ namespace LabberLib.DataBaseContext
 
         public static string CredName { get; } = "adminPOIT";
         public static string CredPsw { get; } = "28032001";
-        public static string FilePath { get; set; }
+        public static string FilePath { get; set; } = "";
         public static uint UserId { get; set; }
         //public bool IsFilled
         //{
@@ -39,10 +42,16 @@ namespace LabberLib.DataBaseContext
         //public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Journal_Lab> Journals_Labs { get; set; }
 
-        public DBWorker(bool createIfNotExists = false)
+        public DBWorker(bool createIfNotExists = false) : base()
         {
+            if (FilePath == "")
+                throw new FileNotFoundException();
+
             if (createIfNotExists)
                 CreateIfNotExists();
+            else
+                if (!File.Exists(FilePath))
+                    throw new FileNotFoundException();
         }
 
         public void CreateIfNotExists()
@@ -52,9 +61,9 @@ namespace LabberLib.DataBaseContext
                 Add(new Role("admin"));
                 Add(new Role("teacher"));
                 SaveChanges();
-                //Add(new User(Roles.FirstOrDefault().Id, "adminPOIT", "28032001"));
+                Add(new User(Roles.FirstOrDefault().Id, "adminPOIT", "Admin", "POIT", null, "28032001"));
                 //Add(new User(Roles.FirstOrDefault(x => x.Title == "teacher").Id, "mvmenshikova"));
-                //SaveChanges();
+                SaveChanges();
                 //Add(new Teacher(Users.FirstOrDefault(x => x.Name == "mvmenshikova").Id, "Меньшикова", "Марина", "Валерьевна"));
                 //SaveChanges();
             }
@@ -86,7 +95,7 @@ namespace LabberLib.DataBaseContext
                 SaveChanges();
 
             }
-            catch (System.Exception)
+            catch (Exception)
             {
 
             }

@@ -97,9 +97,9 @@ namespace LabberClient.Students.StudentsTable
         bool IsAllFieldAreEmpty() => Surname == "" && FirstName == "" && SecondName == "";
 
         public List<Student> AllStudents { get; set; }
-        //public ObservableCollection<Group> Groups { get => new ObservableCollection<Group>(db.Groups); set { db.Groups.AddRange(value); db.SaveChanges(); } }
-        public ObservableCollection<Student> Items { get; set; }
-        public ObservableCollection<Group> Groups { get; set; }
+        public ObservableCollection<Student> Items { get; set; } = new ObservableCollection<Student>();
+        public ObservableCollection<Group> Groups { get; set; } = new ObservableCollection<Group>();
+
         public MvxCommand Add { get; set; }
         public MvxCommand Change { get; set; }
         public MvxCommand Delete { get; set; }
@@ -112,14 +112,6 @@ namespace LabberClient.Students.StudentsTable
         public StudentsTablePageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            using (db = new DBWorker())
-            {
-                AllStudents = db.Students.Include(x => x.Group).ToList();
-                Groups = new ObservableCollection<Group>(db.Groups);
-            }
-            Items = new ObservableCollection<Student>();
-            //db = new DBWorker();
-
             var view1 = (CollectionView)CollectionViewSource.GetDefaultView(Items);
             view1.SortDescriptions.Add(new SortDescription("SecondName", ListSortDirection.Ascending));
             view1.SortDescriptions.Add(new SortDescription("FirtName", ListSortDirection.Ascending));
@@ -136,6 +128,12 @@ namespace LabberClient.Students.StudentsTable
             Clear = new MvxCommand(ClearBody);
             DeleteAll = new MvxCommand(DeleteAllBody);
             AddFromExcel = new MvxCommand(AddFromExcelBody);
+        }
+
+        public override void LoadData()
+        {
+            if (DBWorker.FilePath != "")
+                Refresh(new DBWorker(), 0);
         }
 
         private void Refresh(DBWorker db, uint groupid)

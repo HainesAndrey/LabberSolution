@@ -17,7 +17,7 @@ namespace LabberClient.CreateDB
         private string filePath = "";
         private string fullPath = "";
 
-        public string FullPath { get => fullPath; set { fullPath = value; RaisePropertyChanged("FullPath"); } }
+        public string FullPath { get => fullPath; set { fullPath = value; DBWorker.FilePath = fullPath; RaisePropertyChanged("FullPath"); } }
         public string FileName
         {
             get => fileName;
@@ -43,7 +43,6 @@ namespace LabberClient.CreateDB
             }
         }
 
-        public ObservableCollection<UserDTO> Users { get; set; }
         public MvxCommand ShowFileDialog { get; set; }
         public MvxCommand Cancel { get; set; }
         public MvxCommand Next { get; set; }
@@ -67,50 +66,40 @@ namespace LabberClient.CreateDB
 
         private async void NextBody()
         {
-            Users = (UsersTablePage.DataContext as UsersTablePageVM).Users;
+            var usersCount = (UsersTablePage.DataContext as UsersTablePageVM).Users.Count;
             if (FileName == "")
                 InvokeResponseEvent(ResponseType.Bad, "Укажите название файла новой базы данных");
             else if (FullPath == "")
                 InvokeResponseEvent(ResponseType.Bad, "Укажите путь к файлу новой базы данных");
-            else if (Users.Count == 0)
+            else if (usersCount == 0)
                 InvokeResponseEvent(ResponseType.Bad, "Добавьте пользователей базы данных");
-            else if (!Users.Any(x => x.IsAdmin))
-                InvokeResponseEvent(ResponseType.Bad, "Добавьте хотя бы одного администратора");
+            //else if (!Users.Any(x => x.IsAdmin))
+            //    InvokeResponseEvent(ResponseType.Bad, "Добавьте хотя бы одного администратора");
             else
             {
-                if (File.Exists(FullPath))
+                InvokePageEnabledEvent(false);
+                InvokeLoadingStateEvent(true);
+                await Task.Run(() =>
                 {
-                    InvokeResponseEvent(ResponseType.Bad, "Файл базы данных в данном каталоге уже существует");
-                }
-                else
-                {
-                    InvokeResponseEvent(ResponseType.Neutral, "Подождите...");
-                    InvokePageEnabledEvent(false);
-                    InvokeLoadingStateEvent(true);
-                    await Task.Run(() =>
+                    DBWorker.FilePath = FullPath;
+                    using (db = new DBWorker())
                     {
-                        DBWorker.FilePath = FullPath;
-                        db = new DBWorker(true);
-
-                        db.Users.Add(new User(1, DBWorker.CredName, "Admin", "ПОИТ") { Password = DBWorker.CredPsw });
-                        db.Users.AddRange(Users.Select(x => x.User).Where(x => !db.Users.ToList().Exists(y => y.Login == x.Login)));
-                        db.SaveChanges();
-
                         DBWorker.UserId = db.Users.First(x => x.Login == DBWorker.CredName).Id;
-
-                        InvokeResponseEvent(ResponseType.Good, "База данных успешно создана. Пользователи добавлены в базу данных");
-                    });
-                    InvokeLoadingStateEvent(false);
-                    InvokePageEnabledEvent(true);
-                    InvokeCompleteStateEvent("next");
-                }
-                
+                    }
+                });
+                InvokeLoadingStateEvent(false);
+                InvokePageEnabledEvent(true);
+                InvokeCompleteStateEvent("next");
             }
         }
 
         private void CancelBody()
         {
-            db?.DisconnectAndDelete();
+            if (DBWorker.FilePath != "")
+                using (db = new DBWorker())
+                {
+                    db.DisconnectAndDelete();
+                }
             InvokeCompleteStateEvent("cancel");
         }
 

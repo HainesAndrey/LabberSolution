@@ -26,7 +26,11 @@ namespace LabberClient.Students
 
         private void CancelBody()
         {
-            db?.Disconnect();
+            using (db = new DBWorker())
+            {
+                db.DisconnectAndDelete();
+            }
+
             InvokeCompleteStateEvent("cancel");
         }
 

@@ -5,10 +5,12 @@ using Microsoft.Win32;
 using MvvmCross.Commands;
 using OfficeOpenXml;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Data;
 using LicenseContext = OfficeOpenXml.LicenseContext;
 
@@ -73,7 +75,8 @@ namespace LabberClient.CreateDB.UsersTable
         bool CheckRequiredFields() => Login != "" && Surname != "" && FirstName != "";
         bool IsAllFieldAreEmpty() => Login == "" && Surname == "" && FirstName == "" && SecondName == "" && !IsAdmin;
 
-        public ObservableCollection<UserDTO> Users { get; set; }
+        public ObservableCollection<UserDTO> Users { get; set; } = new ObservableCollection<UserDTO>();
+
         public MvxCommand AddUser { get; set; }
         public MvxCommand ChangeUser { get; set; }
         public MvxCommand DeleteUser { get; set; }
@@ -83,8 +86,7 @@ namespace LabberClient.CreateDB.UsersTable
 
         public UsersTablePageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
-        {
-            Users = new ObservableCollection<UserDTO>();
+        {   
             var view = (CollectionView)CollectionViewSource.GetDefaultView(Users);
             view.SortDescriptions.Add(new SortDescription("IsAdmin", ListSortDirection.Descending));
             view.SortDescriptions.Add(new SortDescription("User.Surname", ListSortDirection.Ascending));
@@ -99,15 +101,32 @@ namespace LabberClient.CreateDB.UsersTable
 
         public override void LoadData()
         {
-            using (db= new DBWorker())
-            {
-                Refresh(db);
-            }
+            if (DBWorker.FilePath == "")
+                return;
+
+            //InvokePageEnabledEvent(false);
+
+            Refresh();
+            //InvokePageEnabledEvent(true);
         }
 
-        private void Refresh(DBWorker db)
+        private async void Refresh()
         {
-
+            InvokeLoadingStateEvent(true);
+            Users.Clear();
+            List<User> users = null;
+            if (DBWorker.FilePath != "")
+                await Task.Run(() =>
+                {
+                    using (db = new DBWorker())
+                    {
+                        users = db.Users.ToList();
+                    }
+                });
+            users?.ForEach(x => Users.Add(new UserDTO(x)));
+            if (users.Count != 0)
+                DeleteAllEnabled = true;
+            InvokeLoadingStateEvent(false);
         }
 
         private void ClearBody()
@@ -121,17 +140,35 @@ namespace LabberClient.CreateDB.UsersTable
 
         private void DeleteAllBody()
         {
-            Users.Clear();
+            using (db = new DBWorker())
+            {
+                db.Users.RemoveRange(Users.Where(x => x.User.Id != 1).Select(x => x.User));
+            }
+            Refresh();
             DeleteAllEnabled = false;
         }
 
         private void DeleteUserBody()
         {
-            Users.Remove(Users.First(x => x.User.Login == CurrentUser.User.Login));
+            if (CurrentUser.User.Id == 1)
+                InvokeResponseEvent(ResponseType.Bad, "Данного пользователя удалить невозможно");
+            else
+            {
+                using (db = new DBWorker())
+                {
+                    db.Users.Remove(Users.First(x => x.User.Login == CurrentUser.User.Login).User);
+                }
+                Refresh();
+            }
         }
 
         private void ChangeUserBody()
         {
+            if (CurrentUser.User.Id == 1)
+            {
+                InvokeResponseEvent(ResponseType.Bad, "Информацию о данном пользователе редактировать невозможно");
+                return;
+            }
             DeleteAllEnabled = false;
             DeleteUserEnabled = false;
             Login = CurrentUser.User.Login;
@@ -142,7 +179,7 @@ namespace LabberClient.CreateDB.UsersTable
             AddSaveUserBtnTitle = "Сохранить";
         }
 
-        private void AddFromExcelBody()
+        private async void AddFromExcelBody()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
@@ -151,32 +188,43 @@ namespace LabberClient.CreateDB.UsersTable
                 Title = "Выберите файл Excel",
                 Filter = "Файл Excel|*.xlsx"
             };
+
             if ((bool)openFileDialog.ShowDialog())
             {
-                object[,] arr;
+                object[,] arr = null;
+                InvokeLoadingStateEvent(true);
+                InvokePageEnabledEvent(false);
+                InvokeResponseEvent(ResponseType.Neutral, "Подождите...");
                 try
                 {
-                    using (var fs = new FileStream(openFileDialog.FileName, FileMode.Open))
+                    await Task.Run(() =>
                     {
-                        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                        ExcelPackage excel = new ExcelPackage(fs);
-                        excel.Load(fs);
+                        using (var fs = new FileStream(openFileDialog.FileName, FileMode.Open))
+                        {
+                            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                            ExcelPackage excel = new ExcelPackage(fs);
+                            excel.Load(fs);
 
-                        try
-                        {
-                            arr = (object[,])excel.Workbook.Worksheets[0].Cells.Value;
+                            try
+                            {
+                                arr = (object[,])excel.Workbook.Worksheets[0].Cells.Value;
+                            }
+                            catch (InvalidOperationException)
+                            {
+                                InvokeResponseEvent(ResponseType.Bad, "Невозможно открыть файл, т.к. он поврежден");
+                                InvokePageEnabledEvent(true);
+                                InvokeLoadingStateEvent(false);
+                                return;
+                            }
+                            excel.Dispose();
                         }
-                        catch (InvalidOperationException)
-                        {
-                            InvokeResponseEvent(ResponseType.Bad, "Невозможно открыть файл, т.к. он поврежден");
-                            return;
-                        }
-                        excel.Dispose();
-                    }
+                    });
                 }
                 catch (IOException)
                 {
                     InvokeResponseEvent(ResponseType.Bad, "Невозможно открыть файл, т.к. он занят другим процессом");
+                    InvokePageEnabledEvent(true);
+                    InvokeLoadingStateEvent(false);
                     return;
                 }
 
@@ -186,6 +234,7 @@ namespace LabberClient.CreateDB.UsersTable
                     InvokeResponseEvent(ResponseType.Bad, "Некорректный шаблон файла");
                 else
                 {
+                    List<User> users = new List<User>();
                     for (int i = 0; i < arr.GetLength(0); i++)
                     {
                         var newuser = new UserDTO()
@@ -199,26 +248,69 @@ namespace LabberClient.CreateDB.UsersTable
                                 SecondName = arr[i, 4]?.ToString(),
                             }
                         };
-                        if (!Users.ToList().Exists(x => x.User.Login == newuser.User.Login))
-                            Users.Add(newuser);
+                        if (!users.ToList().Exists(x => x.Login == newuser.User.Login))
+                            users.Add(newuser.User);
                     }
+                    try
+                    {
+                        await Task.Run(() =>
+                        {
+                            using (db = new DBWorker(true))
+                            {
+                                db.Users.AddRange(users);
+                            }
+                        });
+                        Refresh();
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        InvokeResponseEvent(ResponseType.Bad, "Укажите корректный путь для новой базы данных");
+                        InvokePageEnabledEvent(true);
+                        InvokeLoadingStateEvent(false);
+                        return;
+                    }
+
                     DeleteAllEnabled = true;
                     InvokeResponseEvent(ResponseType.Good, "Пользователи успешно загружены из файла");
                 }
+                InvokeLoadingStateEvent(false);
+                InvokePageEnabledEvent(true);
             }
         }
 
-        private void AddUserBody()
+        private async void AddUserBody()
         {
             if (AddSaveUserBtnTitle == "Добавить")
             {
                 if (Users.ToList().Exists(x => x.User.Login == Login))
                     InvokeResponseEvent(ResponseType.Bad, "Пользователь с таким логином уже добавлен");
+                else if (Users.Select(x => x.User).ToList().Exists(x => x.Surname == Surname && x.FirstName == FirstName && x.SecondName == SecondName))
+                    InvokeResponseEvent(ResponseType.Bad, "Пользователь с такими ФИО уже добавлен");
                 else
                 {
-                    Users.Add(new UserDTO() { User = new User(0, Login, null, Surname, FirstName, SecondName), IsAdmin = IsAdmin });
+                    InvokeLoadingStateEvent(true);
+                    InvokeResponseEvent(ResponseType.Neutral, "Подождите");
+                    try
+                    {
+                        await Task.Run(() =>
+                        {
+                            using (db = new DBWorker(true))
+                            {
+                                db.Users.Add(new User((uint)(IsAdmin ? 1 : 2), Login, Surname, FirstName, SecondName));
+                            }
+                        });
+                        Refresh();
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        InvokeResponseEvent(ResponseType.Bad, "Укажите корректный путь для новой базы данных");
+                        InvokeLoadingStateEvent(false);
+                        return;
+                    }
+                    
                     DeleteAllEnabled = true;
                     InvokeResponseEvent(ResponseType.Good, "Пользователь успешно добавлен");
+                    InvokeLoadingStateEvent(false);
                 }
             }
             else
@@ -227,8 +319,17 @@ namespace LabberClient.CreateDB.UsersTable
                     InvokeResponseEvent(ResponseType.Bad, "Пользователь с таким логином уже добавлен");
                 else
                 {
-                    var index = Users.IndexOf(CurrentUser);
-                    Users[index] = new UserDTO() { User = new User(0, Login, null, Surname, FirstName, SecondName), IsAdmin = IsAdmin };
+                    using (db = new DBWorker())
+                    {
+                        var user = db.Users.First(x => x.Id == CurrentUser.User.Id);
+                        user.Login = Login;
+                        user.Surname = Surname;
+                        user.FirstName = FirstName;
+                        user.SecondName = SecondName;
+                        //user.Password = 
+                        user.RoleId = (uint)(IsAdmin ? 1 : 2);
+                    }
+                    Refresh();
                     AddSaveUserBtnTitle = "Добавить";
                     InvokeResponseEvent(ResponseType.Good, "Пользователь успешно отредактирован");
                     Clear.Execute();
