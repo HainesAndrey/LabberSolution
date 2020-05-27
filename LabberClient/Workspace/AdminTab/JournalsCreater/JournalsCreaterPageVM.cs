@@ -90,6 +90,11 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
             DeleteAll = new MvxCommand(DeleteAllBody);
         }
 
+        public override void LoadData()
+        {
+            
+        }
+
         private void DeleteAllBody()
         {
             using (db = new DBWorker())

@@ -7,10 +7,15 @@ namespace LabberClient.Subjects.SubjectsTable
 {
     public partial class SubjectsTablePage : Page
     {
-        public SubjectsTablePage(ObservableCollection<Subject> subjects, ResponseHandler responseEvent, PageEnabledHandler pageEnabledEvent, LoadingStateHandler loadingStateEvent, CompleteStateHanlder completeStateEvent)
+        public SubjectsTablePage(ResponseHandler responseEvent, PageEnabledHandler pageEnabledEvent, LoadingStateHandler loadingStateEvent, CompleteStateHanlder completeStateEvent)
         {
             InitializeComponent();
-            DataContext = new SubjectsTablePageVM(subjects, responseEvent, pageEnabledEvent, loadingStateEvent, completeStateEvent);
+            DataContext = new SubjectsTablePageVM(responseEvent, pageEnabledEvent, loadingStateEvent, completeStateEvent);
+        }
+
+        private void Page_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            (DataContext as LabberVMBase).LoadData();
         }
     }
 }

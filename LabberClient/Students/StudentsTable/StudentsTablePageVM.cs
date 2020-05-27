@@ -109,11 +109,14 @@ namespace LabberClient.Students.StudentsTable
         public MvxCommand AddGroup { get; set; }
         public MvxCommand DeleteGroup { get; set; }
 
-        public StudentsTablePageVM(ObservableCollection<Group> groups, List<Student> students, ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
+        public StudentsTablePageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            AllStudents = students;
-            Groups = groups;
+            using (db = new DBWorker())
+            {
+                AllStudents = db.Students.Include(x => x.Group).ToList();
+                Groups = new ObservableCollection<Group>(db.Groups);
+            }
             Items = new ObservableCollection<Student>();
             //db = new DBWorker();
 

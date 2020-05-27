@@ -8,22 +8,11 @@
     Title="StudentsTabPage">
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="30"/>
-        </Grid.RowDefinitions>
         <Frame
             Margin="20 0 20 5"
             Focusable="False"
             NavigationUIVisibility="Hidden"
             IsManipulationEnabled="False"
             Content="{Binding StudentsTablePage}"/>
-        <Button
-            VerticalAlignment="Center"
-            Width="100"
-            Grid.Row="1"
-            Content="ОК"
-            FontSize="14"
-            Command="{Binding SaveStudents}"/>
     </Grid>
 </Page>

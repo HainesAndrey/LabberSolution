@@ -13,7 +13,7 @@ namespace LabberClient.CreateDB.UsersTable
 
         private void page_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            (DataContext as UsersTablePageVM).Load();
+            (DataContext as LabberVMBase).LoadData();
         }
     }
 }

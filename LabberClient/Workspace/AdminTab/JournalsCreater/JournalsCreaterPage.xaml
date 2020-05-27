@@ -7,7 +7,7 @@
     mc:Ignorable="d" 
     Title="JournalsCreaterPage"
     FontSize="16"
-    x:Name="page">
+    x:Name="page" Loaded="page_Loaded">
     <Grid
         HorizontalAlignment="Center">
         <Grid

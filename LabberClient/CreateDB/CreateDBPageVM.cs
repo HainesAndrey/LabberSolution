@@ -60,6 +60,11 @@ namespace LabberClient.CreateDB
             UsersTablePage = new UsersTablePage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
         }
 
+        public override void LoadData()
+        {
+            
+        }
+
         private async void NextBody()
         {
             Users = (UsersTablePage.DataContext as UsersTablePageVM).Users;

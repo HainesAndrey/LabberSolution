@@ -62,10 +62,10 @@ namespace LabberClient.Subjects.SubjectsTable
         public MvxCommand DeleteAll { get; set; }
         public MvxCommand AddFromExcel { get; set; }
 
-        public SubjectsTablePageVM(ObservableCollection<Subject> subjects, ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
+        public SubjectsTablePageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            Items = subjects;
+            Items = new ObservableCollection<Subject>();
             var view = (CollectionView)CollectionViewSource.GetDefaultView(Items);
             view.SortDescriptions.Add(new SortDescription("ShortTitle", ListSortDirection.Ascending));
 
@@ -75,6 +75,11 @@ namespace LabberClient.Subjects.SubjectsTable
             Clear = new MvxCommand(ClearBody);
             DeleteAll = new MvxCommand(DeleteAllBody);
             AddFromExcel = new MvxCommand(AddFromExcelBody);
+        }
+
+        public override void LoadData()
+        {
+            
         }
 
         private void DeleteAllBody()

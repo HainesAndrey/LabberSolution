@@ -47,6 +47,11 @@ namespace LabberClient.Workspace.LabsTab
             GroupByGroups.Execute();
         }
 
+        public override void LoadData()
+        {
+            
+        }
+
         private void ExpandAllBody(bool state)
         {
             LoadingState = true;

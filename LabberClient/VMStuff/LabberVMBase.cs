@@ -20,6 +20,8 @@ namespace LabberClient.VMStuff
             this.CompleteStateEvent = CompleteStateEvent;
         }
 
+        public virtual void LoadData() { }
+
         public void InvokeResponseEvent(ResponseType responseType, string msg)
         {
             ResponseEvent?.Invoke(responseType, msg);

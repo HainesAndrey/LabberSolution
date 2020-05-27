@@ -11,15 +11,14 @@ namespace LabberClient.Students
     public class AddStudentsPageVM : LabberVMBase
     {
         public StudentsTablePage StudentsTablePage { get; set; }
-        public List<Student> Students { get; set; } = new List<Student>();
-        public ObservableCollection<Group> Groups { get; set; } = new ObservableCollection<Group>();
+
         public MvxCommand Cancel { get; set; }
         public MvxCommand Next { get; set; }
 
         public AddStudentsPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            StudentsTablePage = new StudentsTablePage(Groups, Students, InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
+            StudentsTablePage = new StudentsTablePage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
 
             Next = new MvxCommand(NextBody);
             Cancel = new MvxCommand(CancelBody);
@@ -35,8 +34,8 @@ namespace LabberClient.Students
         {
             using (db = new DBWorker())
             {
-                db.Groups.AddRange(Groups);
-                db.Students.AddRange(Students);
+                db.Groups.AddRange((StudentsTablePage.DataContext as StudentsTablePageVM).Groups);
+                db.Students.AddRange((StudentsTablePage.DataContext as StudentsTablePageVM).Items);
                 db.SaveChanges();
             }
             InvokeCompleteStateEvent("next");

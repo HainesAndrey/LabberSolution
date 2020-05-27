@@ -96,14 +96,15 @@ namespace LabberClient.CreateDB.UsersTable
             DeleteAll = new MvxCommand(DeleteAllBody);
             Clear = new MvxCommand(ClearBody);
         }
-        public void Load()
+
+        public override void LoadData()
         {
             using (db= new DBWorker())
             {
                 Refresh(db);
             }
-            
         }
+
         private void Refresh(DBWorker db)
         {
 

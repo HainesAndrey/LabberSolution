@@ -12,14 +12,14 @@ namespace LabberClient.Subjects
     public class AddSubjectsPageVM : LabberVMBase
     {
         public SubjectsTablePage SubjectsTablePage { get; set; }
-        public ObservableCollection<Subject> Subjects { get; set; } = new ObservableCollection<Subject>();
+
         public MvxCommand Cancel { get; set; }
         public MvxCommand Next { get; set; }
 
         public AddSubjectsPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            SubjectsTablePage = new SubjectsTablePage(Subjects, InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
+            SubjectsTablePage = new SubjectsTablePage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
 
             Cancel = new MvxCommand(() =>
             {
@@ -38,7 +38,7 @@ namespace LabberClient.Subjects
                     {
                         if (db is null)
                             db = new DBWorker();
-                        db.Subjects.AddRange(Subjects.Where(x => !db.Subjects.ToList().Exists(y => y.ShortTitle == x.ShortTitle)));
+                        db.Subjects.AddRange((SubjectsTablePage.DataContext as SubjectsTablePageVM).Items.Where(x => !db.Subjects.ToList().Exists(y => y.ShortTitle == x.ShortTitle)));
                         db.SaveChanges();
                         InvokeResponseEvent(ResponseType.Good, "Дисциплины успешно добавлены в базу данных");
                     });

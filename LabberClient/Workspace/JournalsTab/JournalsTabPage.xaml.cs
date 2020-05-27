@@ -17,5 +17,10 @@ namespace LabberClient.Workspace.JournalsTab
         {
             (DataContext as JournalsTabPageVM).OpenNewJournal((e.NewValue as Node).IdJournal);
         }
+
+        private void Page_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            (DataContext as LabberVMBase).LoadData();
+        }
     }
 }

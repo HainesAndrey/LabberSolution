@@ -82,6 +82,11 @@ namespace LabberClient.Workspace.JournalsTab
             FilterByOwn.Execute();
         }
 
+        public override void LoadData()
+        {
+            
+        }
+
         public void OpenNewJournal(uint journalId)
         {
             var journal = Journals.FirstOrDefault(x => x.Id == journalId);

@@ -7,7 +7,7 @@
     mc:Ignorable="d" 
     Width="700"
     Title="CreateDBPage"
-    x:Name="page">
+    x:Name="page" Loaded="page_Loaded">
     <Grid
         Background="GhostWhite">
         <Grid.RowDefinitions>
