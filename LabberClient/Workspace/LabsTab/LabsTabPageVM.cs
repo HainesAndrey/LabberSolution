@@ -15,6 +15,7 @@ namespace LabberClient.Workspace.LabsTab
     {
         private bool treeEnabled;
         private bool loadingState;
+        private string addSaveBtnTitle = "Добавить";
 
         public List<Journal> Journals { get; set; } = new List<Journal>();
         public MvxCommand GroupByGroups { get; }
@@ -24,6 +25,7 @@ namespace LabberClient.Workspace.LabsTab
 
         public bool TreeEnabled { get => treeEnabled; set { treeEnabled = value; RaisePropertyChanged("TreeEnabled"); } }
         public bool LoadingState { get => loadingState; set { loadingState = value; RaisePropertyChanged("LoadingState"); } }
+        public string AddSaveBtnTitle { get => addSaveBtnTitle; set { addSaveBtnTitle = value; RaisePropertyChanged("AddSaveBtnTitle"); } }
 
         public ObservableCollection<Node> Nodes { get; set; } = new ObservableCollection<Node>();
 
@@ -104,6 +106,7 @@ namespace LabberClient.Workspace.LabsTab
         public void OpenNewJournal(uint journalId)
         {
             var journal = Journals.FirstOrDefault(x => x.Id == journalId);
+
         }
 
         private string ShortFullNameUserAndSubGroup(User user, string subGroup)

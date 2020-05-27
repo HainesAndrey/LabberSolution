@@ -113,7 +113,8 @@
 
         <Grid
             Grid.Column="1"
-            HorizontalAlignment="Center">
+            HorizontalAlignment="Left"
+            Margin="5 0 0 6">
             <Grid.RowDefinitions>
                 <RowDefinition Height="20"/>
                 <RowDefinition/>

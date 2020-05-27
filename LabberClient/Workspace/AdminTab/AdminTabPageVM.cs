@@ -1,5 +1,10 @@
-﻿using LabberClient.VMStuff;
+﻿using LabberClient.Students;
+using LabberClient.Students.StudentsTable;
+using LabberClient.Subjects;
+using LabberClient.Subjects.SubjectsTable;
+using LabberClient.VMStuff;
 using LabberClient.Workspace.AdminTab.JournalsCreater;
+using LabberClient.Workspace.AdminTab.UsersTable;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,9 +13,9 @@ namespace LabberClient.Workspace.AdminTab
 {
     public class AdminTabPageVM : LabberVMBase
     {
-        public int UsersTablePage { get; set; }
-        public int SubjectsTablePage { get; set; }
-        public int StudentsTablePage { get; set; }
+        public UsersTabPage UsersTabPage { get; set; }
+        public AddSubjectsPage SubjectsTablePage { get; set; }
+        public AddStudentsPage StudentsTablePage { get; set; }
         public JournalsCreaterPage JournalsCreaterPage { get; set; }
         public int ProfilePage { get; set; }
 
@@ -18,6 +23,9 @@ namespace LabberClient.Workspace.AdminTab
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
             JournalsCreaterPage = new JournalsCreaterPage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
+            StudentsTablePage = new AddStudentsPage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
+            SubjectsTablePage = new AddSubjectsPage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
+            UsersTabPage = new UsersTabPage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
         }
     }
 }

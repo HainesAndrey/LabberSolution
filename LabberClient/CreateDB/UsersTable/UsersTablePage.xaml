@@ -1,0 +1,245 @@
+﻿<Page
+    x:Class="LabberClient.CreateDB.UsersTable.UsersTablePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    mc:Ignorable="d" 
+    Title="UsersTablePage"
+    x:Name="page">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="80"/>
+        </Grid.RowDefinitions>
+
+        <ListView
+                    SelectionMode="Single"
+                    BorderBrush="LightGray"
+                    BorderThickness="1 1 1 0"
+                    Background="WhiteSmoke"
+                    ItemsSource="{Binding Users}"
+                    SelectedItem="{Binding CurrentUser}"
+                    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    ScrollViewer.CanContentScroll="False">
+            <ListView.Resources>
+                <ContextMenu
+                            x:Key="RowMenu" 
+                            DataContext="{Binding PlacementTarget.Tag,
+                                RelativeSource={RelativeSource Self}}">
+                    <MenuItem
+                                Header="Редактировать"
+                                Command="{Binding ChangeUser}"/>
+                    <MenuItem
+                                Header="Удалить"
+                                IsEnabled="{Binding DeleteUserEnabled}"
+                                Command="{Binding DeleteUser}"/>
+                    <MenuItem
+                                Header="Удалить всё"
+                                Command="{Binding DeleteAll}"
+                                IsEnabled="{Binding DeleteAllEnabled}"/>
+                </ContextMenu>
+
+                <Style TargetType="{x:Type GridViewColumnHeader}">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Background" Value="White"/>
+                    <Setter Property="Height" Value="25"/>
+                    <Setter Property="FontSize" Value="14"/>
+                    <Setter Property="IsHitTestVisible" Value="False"/>
+                </Style>
+
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="Tag" Value="{Binding ElementName=page, Path=DataContext}"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                    <Setter Property="Height" Value="25"/>
+                    <Setter Property="FontSize" Value="14"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                    <Setter Property="ContextMenu" Value="{StaticResource RowMenu}"/>
+                </Style>
+
+                <!--<DataTemplate x:Key="MyDataTemplate">
+                            <Border BorderBrush="Black" Background="Red"  BorderThickness="1,1,0,0" Margin="-6,-2,-6,-2">
+                                <StackPanel Margin="6,2,6,2">
+                                    <TextBlock Text="{Binding}"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>-->
+            </ListView.Resources>
+
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem
+                                Header="Удалить всё"
+                                Command="{Binding DeleteAll}"
+                                IsEnabled="{Binding DeleteAllEnabled}"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
+
+            <ListView.View>
+                <GridView
+                            AllowsColumnReorder="False">
+                    <GridViewColumn
+                                DisplayMemberBinding="{Binding Path=User.Login}"
+                                Width="140"
+                                Header="Логин"/>
+
+                    <GridViewColumn
+                                Width="60">
+                        <TextBlock Text="Админ." HorizontalAlignment="Center"/>
+                        <GridViewColumn.CellTemplate>
+                            <ItemContainerTemplate>
+                                <CheckBox
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            IsChecked="{Binding IsAdmin}"
+                                            IsHitTestVisible="False" Focusable="False">
+                                </CheckBox>
+                            </ItemContainerTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn
+                                DisplayMemberBinding="{Binding User.Surname}"
+                                Width="145"
+                                Header="Фамилия"/>
+
+                    <GridViewColumn
+                                DisplayMemberBinding="{Binding User.FirstName}"
+                                Width="145"
+                                Header="Имя"/>
+
+                    <GridViewColumn
+                                DisplayMemberBinding="{Binding User.SecondName}"
+                                Width="145"
+                                Header="Отчество"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <Grid
+                    Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="145"/>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="145"/>
+                <ColumnDefinition Width="145"/>
+                <ColumnDefinition Width="145"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+
+            <Border
+                        Grid.ColumnSpan="6"
+                        BorderBrush="Gray"
+                        BorderThickness="1 1 1 1"/>
+
+            <Border
+                        Background="WhiteSmoke"
+                        Grid.Row="1"
+                        Grid.ColumnSpan="6"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 1 1"/>
+
+            <Border
+                        Grid.ColumnSpan="6"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 1 1"/>
+
+            <Border
+                        Grid.Column="1"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 0 0"/>
+
+            <Border
+                        Grid.Column="2"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 0 0"/>
+
+            <Border
+                        Grid.Column="3"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 0 0"/>
+
+            <Border
+                        Grid.Column="4"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 0 0"/>
+
+            <TextBox
+                        Margin="4 0 3 0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}"
+                            
+                        FontSize="14"/>
+
+            <CheckBox
+                        Grid.Column="1"
+                        Margin="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        IsChecked="{Binding IsAdmin, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <TextBox
+                        Grid.Column="2"
+                        Margin="4 0 3 0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Surname, UpdateSourceTrigger=PropertyChanged}"
+                        FontSize="14"/>
+
+            <TextBox
+                        Grid.Column="3"
+                        Margin="4 0 3 0"
+                        VerticalAlignment="Center"
+                        Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}"
+                        FontSize="14"/>
+
+            <TextBox
+                        Grid.Column="4"
+                        Margin="4 0 3 0"
+                        VerticalAlignment="Center"
+                        Text="{Binding SecondName, UpdateSourceTrigger=PropertyChanged}"
+                        FontSize="14"/>
+
+            <Grid
+                        Grid.Row="1"
+                        Grid.ColumnSpan="6"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <StackPanel
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <Button
+                                Margin="10 0 5 0"
+                                VerticalAlignment="Center"
+                                Content="{Binding AddSaveUserBtnTitle}"
+                                FontSize="12"
+                                Command="{Binding AddUser, NotifyOnSourceUpdated=True}"
+                                IsEnabled="{Binding AddUserEnabled}"/>
+
+                    <Button
+                                Margin="5 0"
+                                VerticalAlignment="Center"
+                                Content="Очистить поля"
+                                FontSize="12"
+                                Command="{Binding Clear}"
+                                IsEnabled="{Binding ClearEnabled}"/>
+
+                    <Button
+                                Margin="5 0 10 0"
+                                VerticalAlignment="Center"
+                                Content="Добавить из Excel"
+                                FontSize="12"
+                                Command="{Binding AddFromExcel}"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Page>

@@ -15,7 +15,7 @@
             BorderBrush="LightGray">
             <TabItem
                 Header="Пользователи">
-                <Frame Content="{Binding UsersTablePage}"/>
+                <Frame Content="{Binding UsersTabPage}"/>
             </TabItem>
 
             <TabItem
@@ -33,10 +33,10 @@
                 <Frame Content="{Binding JournalsCreaterPage}"/>
             </TabItem>
 
-            <TabItem
+            <!--<TabItem
                 Header="Профиль">
                 <Frame Content="{Binding ProfilePage}"/>
-            </TabItem>
+            </TabItem>-->
         </TabControl>
     </Grid>
 </Page>

@@ -253,10 +253,16 @@ namespace LabberClient.Students.StudentsTable
                 {
                     for (int i = 0; i < arr.GetLength(0); i++)
                     {
-                        var newsubj = new Student(CurrentGroup.Id, arr[i, 0].ToString(), arr[i, 1].ToString(), arr[i, 1].ToString(), "") { Group = CurrentGroup };
-                        if (!Items.ToList().Exists(x => x.Surname == newsubj.Surname))
-                            Items.Add(newsubj);
+                        var newstudent = new Student(CurrentGroup.Id, arr[i, 0].ToString(), arr[i, 1].ToString(), arr[i, 2].ToString(), "") { Group = CurrentGroup };
+                        if (!Items.ToList().Exists(x => x.Surname == newstudent.Surname && x.FirstName == newstudent.FirstName && x.SecondName == newstudent.SecondName))
+                        {
+                            Items.Add(newstudent);
+                            AllStudents.Add(newstudent);
+                        }
+                            
                     }
+                    //AllStudents.AddRange(Items.Where(x => x.GroupId));
+                    //AllStudents = AllStudents.Distinct().ToList();
                     DeleteAllEnabled = true;
                     InvokeResponseEvent(ResponseType.Good, "Дисциплины успешно добавлены из файла");
                 }
