@@ -81,8 +81,18 @@ namespace LabberLib.DataBaseContext
 
         public override void Dispose()
         {
+            try
+            {
+                SaveChanges();
+
+            }
+            catch (System.Exception)
+            {
+
+            }
+            
             Disconnect();
-            //base.Dispose();
+            base.Dispose();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

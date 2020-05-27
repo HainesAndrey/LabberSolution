@@ -10,5 +10,10 @@ namespace LabberClient.CreateDB.UsersTable
             InitializeComponent();
             DataContext = new UsersTablePageVM(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
         }
+
+        private void page_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            (DataContext as UsersTablePageVM).Load();
+        }
     }
 }

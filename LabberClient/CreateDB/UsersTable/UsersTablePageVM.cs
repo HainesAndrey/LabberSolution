@@ -1,4 +1,5 @@
 ﻿using LabberClient.VMStuff;
+using LabberLib.DataBaseContext;
 using LabberLib.DataBaseContext.Entities;
 using Microsoft.Win32;
 using MvvmCross.Commands;
@@ -94,6 +95,18 @@ namespace LabberClient.CreateDB.UsersTable
             DeleteUser = new MvxCommand(DeleteUserBody);
             DeleteAll = new MvxCommand(DeleteAllBody);
             Clear = new MvxCommand(ClearBody);
+        }
+        public void Load()
+        {
+            using (db= new DBWorker())
+            {
+                Refresh(db);
+            }
+            
+        }
+        private void Refresh(DBWorker db)
+        {
+
         }
 
         private void ClearBody()

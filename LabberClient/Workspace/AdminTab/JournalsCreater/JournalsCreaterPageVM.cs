@@ -19,12 +19,12 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
         private string teacher;
         private bool addEnabled = false;
 
-        public IEnumerable<string> Groups { get; set; }
-        public IEnumerable<string> SubGroups { get; set; }
-        public IEnumerable<string> Subjects { get; set; }
-        public IEnumerable<string> Teachers { get; set; }
+        public ObservableCollection<string> Groups { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> SubGroups { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> Subjects { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> Teachers { get; set; } = new ObservableCollection<string>();
 
-        public ObservableCollection<JournalDTO> Items { get; set; }
+        public ObservableCollection<JournalDTO> Items { get; set; } = new ObservableCollection<JournalDTO>();
         public JournalDTO CurrentItem { get; set; }
 
         public string Group { get => group;
@@ -72,13 +72,11 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
         public JournalsCreaterPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            SubGroups = new List<string>() { "1", "2" };
+            SubGroups = new ObservableCollection<string>() { "1", "2" };
+
             using (db = new DBWorker())
             {
-                Groups = db.Groups.ToList().Select(x => x.Title).OrderBy(x => x);
-                Subjects = db.Subjects.ToList().Select(x => x.ShortTitle).OrderBy(x => x);
-                Teachers = db.Users.Where(x => x.RoleId == 2).ToList().Select(x => ShortFullName(x)).OrderBy(x => x);
-                Items = new ObservableCollection<JournalDTO>(db.Journals.ToList().Select(x => new JournalDTO(x.Id, x.Group.Title, x.SubGroup, x.Subject.ShortTitle, ShortFullName(x.User))));
+                Refresh(db);
             }
 
             var view = (CollectionView)CollectionViewSource.GetDefaultView(Items);
@@ -98,7 +96,7 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
             {
                 db.Journals.RemoveRange(db.Journals);
                 db.SaveChanges();
-                UpdateItems(db);
+                Refresh(db);
             }
         }
 
@@ -108,7 +106,7 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
             {
                 db.Journals.Remove(new Journal() { Id = CurrentItem.Id});
                 db.SaveChanges();
-                UpdateItems(db);
+                Refresh(db);
             }
         }
 
@@ -123,17 +121,24 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
                 {
                     db.Journals.Add(new Journal(groupid, subjectid, teacherid, SubGroup));
                     db.SaveChanges();
-                    UpdateItems(db);
+                    Refresh(db);
                 }
                 else
                     InvokeResponseEvent(ResponseType.Bad, "Такой журнал уже добавлен");
             }
         }
 
-        private void UpdateItems(DBWorker db)
+        private void Refresh(DBWorker db)
         {
             Items.Clear();
+            Groups.Clear();
+            Subjects.Clear();
+            Teachers.Clear();
             db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList().ForEach(x => Items.Add(new JournalDTO(x)));
+            db.Groups.ToList().Select(x => x.Title).OrderBy(x => x).ToList().ForEach(x => Groups.Add(x));
+            db.Subjects.ToList().Select(x => x.ShortTitle).OrderBy(x => x).ToList().ForEach(x => Subjects.Add(x));
+            db.Users.Where(x => x.RoleId == 2).ToList().Select(x => ShortFullName(x)).OrderBy(x => x).ToList().ForEach(x => Teachers.Add(x));
+            db.Journals.ToList().Select(x => new JournalDTO(x)).ToList().ForEach(x => Items.Add(x));
         }
 
         private string ShortFullName(User user)
