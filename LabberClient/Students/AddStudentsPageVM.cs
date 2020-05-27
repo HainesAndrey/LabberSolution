@@ -1,10 +1,7 @@
 ﻿using LabberClient.Students.StudentsTable;
 using LabberClient.VMStuff;
 using LabberLib.DataBaseContext;
-using LabberLib.DataBaseContext.Entities;
 using MvvmCross.Commands;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace LabberClient.Students
 {
@@ -28,20 +25,13 @@ namespace LabberClient.Students
         {
             using (db = new DBWorker())
             {
-                db.DisconnectAndDelete();
+                db.Disconnect();
             }
-
             InvokeCompleteStateEvent("cancel");
         }
 
         private void NextBody()
         {
-            using (db = new DBWorker())
-            {
-                db.Groups.AddRange((StudentsTablePage.DataContext as StudentsTablePageVM).Groups);
-                db.Students.AddRange((StudentsTablePage.DataContext as StudentsTablePageVM).Items);
-                db.SaveChanges();
-            }
             InvokeCompleteStateEvent("next");
         }
     }

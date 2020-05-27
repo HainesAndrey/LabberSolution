@@ -23,30 +23,14 @@ namespace LabberClient.Subjects
 
             Cancel = new MvxCommand(() =>
             {
-                db?.Disconnect();
+                using (db = new DBWorker())
+                {
+                    db?.Disconnect();
+                }
                 InvokeCompleteStateEvent("cancel");
             });
 
-            Next = new MvxCommand(async () =>
-            {
-                if ((SubjectsTablePage.DataContext as SubjectsTablePageVM).Items.Count != 0)
-                {
-                    InvokeResponseEvent(ResponseType.Neutral, "Подождите...");
-                    InvokePageEnabledEvent(false);
-                    InvokeLoadingStateEvent(true);
-                    await Task.Run(() =>
-                    {
-                        if (db is null)
-                            db = new DBWorker();
-                        db.Subjects.AddRange((SubjectsTablePage.DataContext as SubjectsTablePageVM).Items.Where(x => !db.Subjects.ToList().Exists(y => y.ShortTitle == x.ShortTitle)));
-                        db.SaveChanges();
-                        InvokeResponseEvent(ResponseType.Good, "Дисциплины успешно добавлены в базу данных");
-                    });
-                    InvokeLoadingStateEvent(false);
-                    InvokePageEnabledEvent(true);
-                }
-                InvokeCompleteStateEvent("next");
-            });
+            Next = new MvxCommand(() => InvokeCompleteStateEvent("next"));
         }
     }
 }

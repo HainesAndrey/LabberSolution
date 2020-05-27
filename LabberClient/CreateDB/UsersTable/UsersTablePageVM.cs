@@ -234,27 +234,28 @@ namespace LabberClient.CreateDB.UsersTable
                     InvokeResponseEvent(ResponseType.Bad, "Некорректный шаблон файла");
                 else
                 {
-                    List<User> users = new List<User>();
-                    for (int i = 0; i < arr.GetLength(0); i++)
-                    {
-                        var newuser = new UserDTO()
-                        {
-                            IsAdmin = arr[i, 1] is null ? false : arr[i, 1].ToString() == "+",
-                            User = new User()
-                            {
-                                Login = arr[i, 0]?.ToString(),
-                                Surname = arr[i, 2]?.ToString(),
-                                FirstName = arr[i, 3]?.ToString(),
-                                SecondName = arr[i, 4]?.ToString(),
-                            }
-                        };
-                        if (!users.ToList().Exists(x => x.Login == newuser.User.Login))
-                            users.Add(newuser.User);
-                    }
                     try
                     {
                         await Task.Run(() =>
                         {
+                            List<User> users = new List<User>();
+                            for (int i = 0; i < arr.GetLength(0); i++)
+                            {
+                                var newuser = new UserDTO()
+                                {
+                                    IsAdmin = arr[i, 1] is null ? false : arr[i, 1].ToString() == "+",
+                                    User = new User()
+                                    {
+                                        Login = arr[i, 0]?.ToString(),
+                                        Surname = arr[i, 2]?.ToString(),
+                                        FirstName = arr[i, 3]?.ToString(),
+                                        SecondName = arr[i, 4]?.ToString(),
+                                    }
+                                };
+                                if (!users.ToList().Exists(x => x.Login == newuser.User.Login))
+                                    users.Add(newuser.User);
+                            }
+
                             using (db = new DBWorker(true))
                             {
                                 db.Users.AddRange(users);

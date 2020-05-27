@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Data;
 using LicenseContext = OfficeOpenXml.LicenseContext;
 
@@ -133,17 +134,31 @@ namespace LabberClient.Students.StudentsTable
         public override void LoadData()
         {
             if (DBWorker.FilePath != "")
-                Refresh(new DBWorker(), 0);
+                Refresh(0);
         }
 
-        private void Refresh(DBWorker db, uint groupid)
+        private async void Refresh(uint groupid)
         {
             Groups.Clear();
-            db.Groups.ToList().ForEach(x => Groups.Add(x));
-            AllStudents = db.Students.Include(x => x.Group).ToList();
             Items.Clear();
+
+            List<Group> groups = new List<Group>();
+            await Task.Run(() =>
+            {
+                using (db = new DBWorker())
+                {
+                    groups = db.Groups.ToList();
+                    AllStudents = db.Students.Include(x => x.Group).ToList();
+                }
+            });
+
+            groups.ForEach(x => Groups.Add(x));
             AllStudents.Where(x => x.GroupId == groupid).ToList().ForEach(x => Items.Add(x));
-            GroupTitle = Groups.FirstOrDefault(x => x.Id == groupid)?.Title ?? "";
+
+            if (groupid != 0)
+                GroupTitle = Groups.FirstOrDefault(x => x.Id == groupid)?.Title ?? "";
+            else
+                GroupTitle = Groups.FirstOrDefault()?.Title ?? "";
         }
 
         private void DeleteGroupBody()
@@ -152,13 +167,9 @@ namespace LabberClient.Students.StudentsTable
             {
                 db.Groups.Remove(Groups.First(x => x.Title == GroupTitle));
                 db.SaveChanges();
-                Refresh(db, CurrentGroup.Id);
             }
-            
-            //Students.Remove(x => x.Group?.Title == GroupTitle);
+            Refresh(CurrentGroup.Id);
             GroupTitle = "";
-            //db.Groups.Remove = Groups;
-            //db.Students = AllStudents;
             InvokeResponseEvent(ResponseType.Good, "Группа успешно удалена");
         }
 
@@ -171,9 +182,8 @@ namespace LabberClient.Students.StudentsTable
                     db.Groups.Add(new Group(GroupTitle));
                     db.SaveChanges();
                     CurrentGroup = db.Groups.First(x => x.Title == GroupTitle);
-                    Refresh(db, CurrentGroup.Id);
                 }
-                CurrentGroup = Groups.First(x => x.Title == GroupTitle);
+                Refresh(CurrentGroup.Id);
                 InvokeResponseEvent(ResponseType.Good, "Группа успешно добавлена");
             }
         }
@@ -183,9 +193,8 @@ namespace LabberClient.Students.StudentsTable
             using (db = new DBWorker())
             {
                 db.Students.RemoveRange(Items);
-                db.SaveChanges();
-                Refresh(db, CurrentGroup.Id);
             }
+            Refresh(CurrentGroup.Id);
             DeleteAllEnabled = false;
         }
 
@@ -201,9 +210,8 @@ namespace LabberClient.Students.StudentsTable
             using (db = new DBWorker())
             {
                 db.Students.Remove(Items.First(x => x.Surname == CurrentItem.Surname && x.FirstName == CurrentItem.FirstName && x.SecondName == CurrentItem.SecondName));
-                db.SaveChanges();
-                Refresh(db, CurrentGroup.Id);
             }
+            Refresh(CurrentGroup.Id);
             if (Items.Count == 0)
                 DeleteAllEnabled = false;
         }
@@ -229,9 +237,8 @@ namespace LabberClient.Students.StudentsTable
                     using (db = new DBWorker())
                     {
                         db.Students.Add(new Student(CurrentGroup.Id, Surname, FirstName, SecondName, ""));
-                        db.SaveChanges();
-                        Refresh(db, CurrentGroup.Id);
                     }
+                    Refresh(CurrentGroup.Id);
                     DeleteAllEnabled = true;
                     InvokeResponseEvent(ResponseType.Good, "Учащийся успешно добавлен");
                 }
@@ -244,11 +251,8 @@ namespace LabberClient.Students.StudentsTable
                     stud.Surname = Surname;
                     stud.FirstName = FirstName;
                     stud.SecondName = SecondName;
-                    db.SaveChanges();
-                    Refresh(db, CurrentGroup.Id);
                 }
-                //var index = Items.IndexOf(CurrentItem);
-                //Items[index] = new Student(CurrentGroup.Id, Surname, FirstName, SecondName, "") { Group = CurrentGroup };
+                Refresh(CurrentGroup.Id);
                 AddSaveBtnTitle = "Добавить";
                 InvokeResponseEvent(ResponseType.Good, "Информация об учащемся успешно отредактирована");
                 Clear.Execute();
@@ -257,7 +261,7 @@ namespace LabberClient.Students.StudentsTable
             }
         }
 
-        private void AddFromExcelBody()
+        private async void AddFromExcelBody()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
@@ -268,26 +272,29 @@ namespace LabberClient.Students.StudentsTable
             };
             if ((bool)openFileDialog.ShowDialog())
             {
-                object[,] arr;
+                object[,] arr = null;
                 try
                 {
-                    using (var fs = new FileStream(openFileDialog.FileName, FileMode.Open))
+                    await Task.Run(() =>
                     {
-                        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                        ExcelPackage excel = new ExcelPackage(fs);
-                        excel.Load(fs);
+                        using (var fs = new FileStream(openFileDialog.FileName, FileMode.Open))
+                        {
+                            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                            ExcelPackage excel = new ExcelPackage(fs);
+                            excel.Load(fs);
 
-                        try
-                        {
-                            arr = (object[,])excel.Workbook.Worksheets[0].Cells.Value;
+                            try
+                            {
+                                arr = (object[,])excel.Workbook.Worksheets[0].Cells.Value;
+                            }
+                            catch (InvalidOperationException)
+                            {
+                                InvokeResponseEvent(ResponseType.Bad, "Невозможно открыть файл, т.к. он поврежден");
+                                return;
+                            }
+                            excel.Dispose();
                         }
-                        catch (InvalidOperationException)
-                        {
-                            InvokeResponseEvent(ResponseType.Bad, "Невозможно открыть файл, т.к. он поврежден");
-                            return;
-                        }
-                        excel.Dispose();
-                    }
+                    });
                 }
                 catch (IOException)
                 {
@@ -301,9 +308,6 @@ namespace LabberClient.Students.StudentsTable
                     InvokeResponseEvent(ResponseType.Bad, "Некорректный шаблон файла");
                 else
                 {
-                    
-                    //AllStudents.AddRange(Items.Where(x => x.GroupId));
-                    //AllStudents = AllStudents.Distinct().ToList();
                     using (db = new DBWorker())
                     {
                         for (int i = 0; i < arr.GetLength(0); i++)
@@ -314,11 +318,10 @@ namespace LabberClient.Students.StudentsTable
                                 db.Students.Add(newstudent);
                             }
                         }
-                        db.SaveChanges();
-                        Refresh(db, CurrentGroup.Id);
                     }
+                    Refresh(CurrentGroup.Id);
                     DeleteAllEnabled = true;
-                    InvokeResponseEvent(ResponseType.Good, "Дисциплины успешно добавлены из файла");
+                    InvokeResponseEvent(ResponseType.Good, "Учащиеся успешно добавлены из файла");
                 }
             }
         }

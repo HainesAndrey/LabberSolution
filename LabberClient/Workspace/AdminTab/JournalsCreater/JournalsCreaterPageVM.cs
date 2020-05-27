@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace LabberClient.Workspace.AdminTab.JournalsCreater
@@ -20,7 +21,7 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
         private bool addEnabled = false;
 
         public ObservableCollection<string> Groups { get; set; } = new ObservableCollection<string>();
-        public ObservableCollection<string> SubGroups { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> SubGroups { get; set; } = new ObservableCollection<string>() { "1", "2" };
         public ObservableCollection<string> Subjects { get; set; } = new ObservableCollection<string>();
         public ObservableCollection<string> Teachers { get; set; } = new ObservableCollection<string>();
 
@@ -67,18 +68,9 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
         public MvxCommand Delete { get; set; }
         public MvxCommand DeleteAll { get; set; }
 
-        public MvxCommand Complete { get; set; }
-
         public JournalsCreaterPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            SubGroups = new ObservableCollection<string>() { "1", "2" };
-
-            using (db = new DBWorker())
-            {
-                Refresh(db);
-            }
-
             var view = (CollectionView)CollectionViewSource.GetDefaultView(Items);
             view.SortDescriptions.Add(new SortDescription("Group", ListSortDirection.Ascending));
             view.SortDescriptions.Add(new SortDescription("SubGroup", ListSortDirection.Ascending));
@@ -92,7 +84,36 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
 
         public override void LoadData()
         {
-            
+            Refresh();
+        }
+
+        private async void Refresh()
+        {
+            Items.Clear();
+            Groups.Clear();
+            Subjects.Clear();
+            Teachers.Clear();
+
+            List<string> groups = null;
+            List<string> subjects = null;
+            List<string> users = null;
+            List<Journal> journals = null;
+
+            await Task.Run(() =>
+            {
+                using (db = new DBWorker())
+                {
+                    groups = db.Groups.ToList().Select(x => x.Title).OrderBy(x => x).ToList();
+                    subjects = db.Subjects.ToList().Select(x => x.ShortTitle).OrderBy(x => x).ToList();
+                    users = db.Users.Where(x => x.RoleId == 2).ToList().Select(x => ShortFullName(x)).OrderBy(x => x).ToList();
+                    journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList();
+                }
+            });
+
+            groups?.ForEach(x => Groups.Add(x));
+            subjects?.ForEach(x => Subjects.Add(x));
+            users?.ForEach(x => Teachers.Add(x));
+            journals?.ForEach(x => Items.Add(new JournalDTO(x)));
         }
 
         private void DeleteAllBody()
@@ -100,9 +121,8 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
             using (db = new DBWorker())
             {
                 db.Journals.RemoveRange(db.Journals);
-                db.SaveChanges();
-                Refresh(db);
             }
+            Refresh();
         }
 
         private void DeleteBody()
@@ -110,9 +130,8 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
             using (db = new DBWorker())
             {
                 db.Journals.Remove(new Journal() { Id = CurrentItem.Id});
-                db.SaveChanges();
-                Refresh(db);
             }
+            Refresh();
         }
 
         private void AddBody()
@@ -125,25 +144,11 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
                 if (!db.Journals.ToList().Exists(x => x.GroupId == groupid && x.SubjectId == subjectid && x.UserId == teacherid && x.SubGroup == SubGroup))
                 {
                     db.Journals.Add(new Journal(groupid, subjectid, teacherid, SubGroup));
-                    db.SaveChanges();
-                    Refresh(db);
                 }
                 else
                     InvokeResponseEvent(ResponseType.Bad, "Такой журнал уже добавлен");
             }
-        }
-
-        private void Refresh(DBWorker db)
-        {
-            Items.Clear();
-            Groups.Clear();
-            Subjects.Clear();
-            Teachers.Clear();
-            db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList().ForEach(x => Items.Add(new JournalDTO(x)));
-            db.Groups.ToList().Select(x => x.Title).OrderBy(x => x).ToList().ForEach(x => Groups.Add(x));
-            db.Subjects.ToList().Select(x => x.ShortTitle).OrderBy(x => x).ToList().ForEach(x => Subjects.Add(x));
-            db.Users.Where(x => x.RoleId == 2).ToList().Select(x => ShortFullName(x)).OrderBy(x => x).ToList().ForEach(x => Teachers.Add(x));
-            db.Journals.ToList().Select(x => new JournalDTO(x)).ToList().ForEach(x => Items.Add(x));
+            Refresh();
         }
 
         private string ShortFullName(User user)

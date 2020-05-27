@@ -1,13 +1,16 @@
 ﻿using LabberClient.VMStuff;
+using LabberLib.DataBaseContext;
 using LabberLib.DataBaseContext.Entities;
 using Microsoft.Win32;
 using MvvmCross.Commands;
 using OfficeOpenXml;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Data;
 using LicenseContext = OfficeOpenXml.LicenseContext;
 
@@ -54,7 +57,7 @@ namespace LabberClient.Subjects.SubjectsTable
         bool IsAllFieldAreEmpty() => ShortTitle == "" && LongTitle == "";
 
 
-        public ObservableCollection<Subject> Items { get; set; }
+        public ObservableCollection<Subject> Items { get; set; } = new ObservableCollection<Subject>();
         public MvxCommand Add { get; set; }
         public MvxCommand Change { get; set; }
         public MvxCommand Delete { get; set; }
@@ -65,7 +68,6 @@ namespace LabberClient.Subjects.SubjectsTable
         public SubjectsTablePageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            Items = new ObservableCollection<Subject>();
             var view = (CollectionView)CollectionViewSource.GetDefaultView(Items);
             view.SortDescriptions.Add(new SortDescription("ShortTitle", ListSortDirection.Ascending));
 
@@ -79,12 +81,32 @@ namespace LabberClient.Subjects.SubjectsTable
 
         public override void LoadData()
         {
-            
+            Refresh();
+        }
+
+        private async void Refresh()
+        {
+            Items.Clear();
+            InvokeLoadingStateEvent(true);
+            List<Subject> subjects = null;
+            await Task.Run(() =>
+            {
+                using (db = new DBWorker())
+                {
+                    subjects = db.Subjects.ToList();
+                }
+            });
+            subjects?.ForEach(x => Items.Add(x));
+            InvokeLoadingStateEvent(false);
         }
 
         private void DeleteAllBody()
         {
-            Items.Clear();
+            using (db = new DBWorker())
+            {
+                db.Subjects.RemoveRange(Items);
+            }
+            Refresh();
         }
 
         private void ClearBody()
@@ -95,7 +117,11 @@ namespace LabberClient.Subjects.SubjectsTable
 
         private void DeleteBody()
         {
-            Items.Remove(Items.First(x => x.ShortTitle == ShortTitle));
+            using (db = new DBWorker())
+            {
+                db.Subjects.Remove(db.Subjects.First(x => x.ShortTitle == ShortTitle));
+            }
+            Refresh();
         }
 
         private void ChangeBody()
@@ -107,19 +133,41 @@ namespace LabberClient.Subjects.SubjectsTable
             AddSaveBtnTitle = "Сохранить";
         }
 
-        private void AddBody()
+        private async void AddBody()
         {
             if (AddSaveBtnTitle == "Добавить")
             {
                 if (Items.ToList().Exists(x => x.ShortTitle == ShortTitle))
                     InvokeResponseEvent(ResponseType.Bad, "Дисциплина с такой аббревиатурой уже добавлена");
                 else
-                    Items.Add(new Subject(ShortTitle, LongTitle));
+                {
+                    InvokeLoadingStateEvent(true);
+                    await Task.Run(() =>
+                    {
+                        using (db = new DBWorker())
+                        {
+                            db.Subjects.Add(new Subject(ShortTitle, LongTitle));
+                        }
+                    });
+                    Refresh();
+                    InvokeLoadingStateEvent(false);
+                }
             }
             else
             {
-                var index = Items.IndexOf(CurrentItem);
-                Items[index] = new Subject(ShortTitle, LongTitle);
+                InvokeLoadingStateEvent(true);
+                await Task.Run(() =>
+                {
+                    using (db = new DBWorker())
+                    {
+                        var subject = db.Subjects.FirstOrDefault(x => x.ShortTitle == CurrentItem.ShortTitle && x.LongTitle == CurrentItem.LongTitle);
+                        subject.ShortTitle = ShortTitle;
+                        subject.LongTitle = LongTitle;
+                    }
+                });
+                InvokeLoadingStateEvent(false);
+                Refresh();
+
                 AddSaveBtnTitle = "Добавить";
                 InvokeResponseEvent(ResponseType.Good, "Диспицлина успешно отредактирована");
                 Clear.Execute();
@@ -128,7 +176,7 @@ namespace LabberClient.Subjects.SubjectsTable
             }
         }
 
-        private void AddFromExcelBody()
+        private async void AddFromExcelBody()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
@@ -139,30 +187,37 @@ namespace LabberClient.Subjects.SubjectsTable
             };
             if ((bool)openFileDialog.ShowDialog())
             {
-                object[,] arr;
+                InvokeLoadingStateEvent(true);
+                InvokePageEnabledEvent(false);
+                object[,] arr = null;
                 try
                 {
-                    using (var fs = new FileStream(openFileDialog.FileName, FileMode.Open))
+                    await Task.Run(() =>
                     {
-                        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                        ExcelPackage excel = new ExcelPackage(fs);
-                        excel.Load(fs);
+                        using (var fs = new FileStream(openFileDialog.FileName, FileMode.Open))
+                        {
+                            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                            ExcelPackage excel = new ExcelPackage(fs);
+                            excel.Load(fs);
 
-                        try
-                        {
-                            arr = (object[,])excel.Workbook.Worksheets[0].Cells.Value;
+                            try
+                            {
+                                arr = (object[,])excel.Workbook.Worksheets[0].Cells.Value;
+                            }
+                            catch (InvalidOperationException)
+                            {
+                                InvokeResponseEvent(ResponseType.Bad, "Невозможно открыть файл, т.к. он поврежден");
+                                return;
+                            }
+                            excel.Dispose();
                         }
-                        catch (InvalidOperationException)
-                        {
-                            InvokeResponseEvent(ResponseType.Bad, "Невозможно открыть файл, т.к. он поврежден");
-                            return;
-                        }
-                        excel.Dispose();
-                    }
+                    });
                 }
                 catch (IOException)
                 {
                     InvokeResponseEvent(ResponseType.Bad, "Невозможно открыть файл, т.к. он занят другим процессом");
+                    InvokeLoadingStateEvent(false);
+                    InvokePageEnabledEvent(true);
                     return;
                 }
 
@@ -172,14 +227,25 @@ namespace LabberClient.Subjects.SubjectsTable
                     InvokeResponseEvent(ResponseType.Bad, "Некорректный шаблон файла");
                 else
                 {
-                    for (int i = 0; i < arr.GetLength(0); i++)
+                    List<Subject> subjects = new List<Subject>();
+                    await Task.Run(() =>
                     {
-                        var newsubj = new Subject(arr[i, 0].ToString(), arr[i, 1].ToString());
-                        if (!Items.ToList().Exists(x => x.ShortTitle == newsubj.ShortTitle))
-                            Items.Add(newsubj);
-                    }
+                        for (int i = 0; i < arr.GetLength(0); i++)
+                        {
+                            var newsubj = new Subject(arr[i, 0].ToString(), arr[i, 1].ToString());
+                            if (!subjects.ToList().Exists(x => x.ShortTitle == newsubj.ShortTitle))
+                                subjects.Add(newsubj);
+                        }
+                        using (db = new DBWorker())
+                        {
+                            db.Subjects.AddRange(subjects);
+                        }
+                    });
+                    Refresh();
                     DeleteAllEnabled = true;
                     InvokeResponseEvent(ResponseType.Good, "Дисциплины успешно добавлены из файла");
+                    InvokeLoadingStateEvent(false);
+                    InvokePageEnabledEvent(true);
                 }
             }
         }

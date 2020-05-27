@@ -6,7 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     mc:Ignorable="d" 
     Title="WorkspacePage">
-    <Grid>
+    <Grid
+        HorizontalAlignment="Center">
         <Grid.Effect>
             <DropShadowEffect
                 BlurRadius="20"
@@ -18,6 +19,11 @@
             FontSize="14"
             Background="GhostWhite"
             BorderThickness="0">
+            <TabControl.Resources>
+                <Style TargetType="{x:Type TabPanel}">
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                </Style>
+            </TabControl.Resources>
             <TabItem
                 Header="Журналы">
                 <Frame

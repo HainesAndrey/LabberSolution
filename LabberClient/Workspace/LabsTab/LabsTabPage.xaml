@@ -72,6 +72,7 @@
                     <CheckBox
                         Margin="2 3"
                         Content="Раскрыть все ветви"
+                        IsChecked="{Binding NeedToExpandAll}"
                         Command="{Binding ExpandAll}"
                         CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"/>
 

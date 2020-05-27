@@ -7,6 +7,7 @@ using MvvmCross.Commands;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -17,10 +18,13 @@ namespace LabberClient.Workspace.JournalsTab
         private bool treeEnabled = true;
         private bool loadingState;
         private Visibility filterEnabled;
+        private ObservableCollection<Node> nodes;
+        private bool needToExpandAll;
 
         public bool TreeEnabled { get => treeEnabled; set { treeEnabled = value; RaisePropertyChanged("TreeEnabled"); } }
         public bool LoadingState { get => loadingState; set { loadingState = value; RaisePropertyChanged("LoadingState"); } }
         public Visibility FilterEnabled { get => filterEnabled; set { filterEnabled = value; RaisePropertyChanged("FilterEnabled"); } }
+        public bool NeedToExpandAll { get => needToExpandAll; set { needToExpandAll = value; RaisePropertyChanged("NeedToExpandAll"); } }
 
         public MvxCommand GroupByGroups { get; set; }
         public MvxCommand GroupBySubjects { get; set; }
@@ -29,45 +33,14 @@ namespace LabberClient.Workspace.JournalsTab
         public MvxCommand FilterByAll { get; set; }
         public MvxCommand<bool> ExpandAll { get; set; }
 
-        public ObservableCollection<Node> Nodes { get; set; } = new ObservableCollection<Node>();
+        public ObservableCollection<Node> Nodes { get => nodes; set { nodes = value; RaisePropertyChanged("Nodes"); } }
         public ObservableCollection<TabItem> Tabs { get; set; } = new ObservableCollection<TabItem>();
         public List<Journal> Journals { get; set; } = new List<Journal>();
 
         public JournalsTabPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            //Journals = new List<Journal>()
-            //{
-            //    new Journal(1, 1, 1, "1")
-            //    {
-            //        Id = 1,
-            //        Group = new Group("П-1722") { Id = 1 },
-            //        Subject = new Subject("БДиСУБД", "Базы данных и сисетмы управления базами данных") { Id = 1 },
-            //        User = new User() { Surname = "Доманова", FirstName = "Юлия", SecondName = "Анатольенва", Id = 1 }
-            //    },
-            //    new Journal(2, 2, 2, "1")
-            //    {
-            //        Id = 2,
-            //        Group = new Group("П-42") { Id = 2 },
-            //        Subject = new Subject("ПООГИ", "Программное обеспечение информационных технологий") { Id = 2 },
-            //        User = new User() { Surname = "Меньшикова", FirstName = "Марина", SecondName = "Валерьвена", Id = 2 }
-            //    },
-            //    new Journal(1, 3, 3, "2")
-            //    {
-            //        Id = 3,
-            //        Group = new Group("П-1722") { Id = 1 },
-            //        Subject = new Subject("СиАОД", "Структуры и алогритмы обработки данных") { Id = 3 },
-            //        User = new User() { Surname = "Дроздова", FirstName = "Юлия", SecondName = "Анатольенва", Id = 3 }
-            //    },
-            //};
-
-            using (db = new DBWorker())
-            {
-                var isAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;
-                FilterEnabled = isAdmin ? Visibility.Collapsed : Visibility.Visible;
-                Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList();
-            }
-
+            Refresh();
 
             GroupByGroups = new MvxCommand(GroupByGroupsBody);
             GroupBySubjects = new MvxCommand(GroupBySubjectsBody);
@@ -77,14 +50,31 @@ namespace LabberClient.Workspace.JournalsTab
             FilterByAll = new MvxCommand(FilterByAllBody);
 
             ExpandAll = new MvxCommand<bool>(ExpandAllBody);
-
-            GroupByGroups.Execute();
-            FilterByOwn.Execute();
         }
 
         public override void LoadData()
         {
-            
+            InvokeLoadingStateEvent(true);
+            Refresh();
+            InvokeLoadingStateEvent(false);
+        }
+
+        private async void Refresh()
+        {
+            bool isAdmin = false;
+            await Task.Run(() =>
+            {
+                using (db = new DBWorker())
+                {
+                    isAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;
+                    Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList();
+                }
+            });
+
+            FilterEnabled = isAdmin ? Visibility.Collapsed : Visibility.Visible;
+            GroupByGroups.Execute();
+            if (isAdmin)
+                FilterByOwn.Execute();
         }
 
         public void OpenNewJournal(uint journalId)
@@ -114,30 +104,36 @@ namespace LabberClient.Workspace.JournalsTab
             LoadingState = false;
         }
 
-        private void GroupBy(
+        private async void GroupBy(
             IEnumerable<(string title, uint secondId, uint thirdId, string subGroup)> first,
             IEnumerable<(uint id, string title, uint thirdId, string subGroup)> second,
             IEnumerable<(uint id, string title, string subGroup, uint journalId)> third)
         {
-            TreeEnabled = false;
+            //TreeEnabled = false;
             LoadingState = true;
-            Nodes.Clear();
 
-            first.GroupBy(f => f.title).Select(f => new Node()
+            List<Node> nodes = null;
+            await Task.Run(() =>
             {
-                Title = f.Key,
-                Nodes = new ObservableCollection<Node>(second.Where(s => f.ToList().Exists(s1 => s1.secondId == s.id && s1.subGroup == s.subGroup)).GroupBy(s => s.title).Select(s => new Node()
+                nodes = first.GroupBy(f => f.title).Select(f => new Node()
                 {
-                    Title = s.Key,
-                    Nodes = new ObservableCollection<Node>(third.Where(t => s.ToList().Exists(t1 => t1.thirdId == t.id && t1.subGroup == t.subGroup)).Select(t => new Node()
+                    Title = f.Key,
+                    Nodes = new ObservableCollection<Node>(second.Where(s => f.ToList().Exists(s1 => s1.secondId == s.id && s1.subGroup == s.subGroup)).GroupBy(s => s.title).Select(s => new Node()
                     {
-                        Title = t.title,
-                        IdJournal = t.journalId,
+                        Title = s.Key,
+                        Nodes = new ObservableCollection<Node>(third.Where(t => s.ToList().Exists(t1 => t1.thirdId == t.id && t1.subGroup == t.subGroup)).Select(t => new Node()
+                        {
+                            Title = t.title,
+                            IdJournal = t.journalId,
+                        }))
                     }))
-                }))
-            }).ToList().ForEach(x => Nodes.Add(x));
+                }).ToList();
+            });
+            Nodes = new ObservableCollection<Node>(nodes);
+            if (NeedToExpandAll)
+                ExpandAll.Execute(true);
 
-            TreeEnabled = true;
+            //TreeEnabled = true;
             LoadingState = false;
         }
 
