@@ -237,6 +237,20 @@ namespace LabberClient.Students.StudentsTable
                     using (db = new DBWorker())
                     {
                         db.Students.Add(new Student(CurrentGroup.Id, Surname, FirstName, SecondName, ""));
+                        db.SaveChanges();
+                        db.Students.OrderBy(x => x.Surname).ThenBy(x => x.FirstName).ThenBy(x => x.SecondName);
+                        db.SaveChanges();
+                        var students = db.Students.ToList().OrderBy(x => x.Surname).ThenBy(x => x.FirstName).ThenBy(x => x.SecondName).ToList();
+                        for (int i = 0; i < students.Count() / 2 + 1; i++)
+                        {
+                            var student = db.Students.FirstOrDefault(x => x.Id == students[i].Id);
+                            student.SubGroup = "1";
+                        }
+                        for (int i = students.Count() / 2 + 1; i < students.Count(); i++)
+                        {
+                            var student = db.Students.FirstOrDefault(x => x.Id == students[i].Id);
+                            student.SubGroup = "2";
+                        }
                     }
                     Refresh(CurrentGroup.Id);
                     DeleteAllEnabled = true;
@@ -317,6 +331,18 @@ namespace LabberClient.Students.StudentsTable
                             {
                                 db.Students.Add(newstudent);
                             }
+                        }
+                        db.SaveChanges();
+                        var students = db.Students.ToList().OrderBy(x => x.Surname).ThenBy(x => x.FirstName).ThenBy(x => x.SecondName).ToList();
+                        for (int i = 0; i < students.Count() / 2 + 1; i++)
+                        {
+                            var student = db.Students.FirstOrDefault(x => x.Id == students[i].Id);
+                            student.SubGroup = "1";
+                        }
+                        for (int i = students.Count() / 2 + 1; i < students.Count(); i++)
+                        {
+                            var student = db.Students.FirstOrDefault(x => x.Id == students[i].Id);
+                            student.SubGroup = "2";
                         }
                     }
                     Refresh(CurrentGroup.Id);

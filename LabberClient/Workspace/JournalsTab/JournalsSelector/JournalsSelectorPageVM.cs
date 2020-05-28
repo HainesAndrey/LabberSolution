@@ -23,6 +23,7 @@ namespace LabberClient.Workspace.JournalsTab.JournalsSelector
         public bool LoadingState { get => loadingState; set { loadingState = value; RaisePropertyChanged("LoadingState"); } }
         public Visibility FilterEnabled { get => filterEnabled; set { filterEnabled = value; RaisePropertyChanged("FilterEnabled"); } }
         public bool NeedToExpandAll { get => needToExpandAll; set { needToExpandAll = value; RaisePropertyChanged("NeedToExpandAll"); } }
+        public bool IsAdmin { get; set; }
 
         public MvxCommand GroupByGroups { get; set; }
         public MvxCommand GroupBySubjects { get; set; }
@@ -41,7 +42,14 @@ namespace LabberClient.Workspace.JournalsTab.JournalsSelector
         public JournalsSelectorPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            Refresh();
+            using (db = new DBWorker())
+            {
+                IsAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;
+                //if (byOwn)
+                    Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).Where(x => x.UserId == DBWorker.UserId).ToList();
+                //else
+                //    Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList();
+            }
 
             GroupByGroups = new MvxCommand(GroupByGroupsBody);
             GroupBySubjects = new MvxCommand(GroupBySubjectsBody);
@@ -56,26 +64,28 @@ namespace LabberClient.Workspace.JournalsTab.JournalsSelector
         public override void LoadData()
         {
             InvokeLoadingStateEvent(true);
-            Refresh();
+            Refresh(true);
             InvokeLoadingStateEvent(false);
         }
 
-        private async void Refresh()
+        private async void Refresh(bool byOwn)
         {
-            bool isAdmin = false;
             await Task.Run(() =>
             {
                 using (db = new DBWorker())
                 {
-                    isAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;
-                    Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList();
+                    IsAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;
+                    if (byOwn && !IsAdmin)
+                        Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).Where(x => x.UserId == DBWorker.UserId).ToList();
+                    else
+                        Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList();
                 }
             });
 
-            FilterEnabled = isAdmin ? Visibility.Collapsed : Visibility.Visible;
+            FilterEnabled = IsAdmin ? Visibility.Collapsed : Visibility.Visible;
             GroupByGroups.Execute();
-            if (isAdmin)
-                FilterByOwn.Execute();
+            //if (isAdmin)
+            //    FilterByOwn.Execute();
         }
 
         public void SelectJournal(uint journalId)
@@ -149,12 +159,12 @@ namespace LabberClient.Workspace.JournalsTab.JournalsSelector
 
         private void FilterByAllBody()
         {
-
+            Refresh(false);
         }
 
         private void FilterByOwnBody()
         {
-
+            Refresh(true);
         }
 
         private string ShortFullNameUserAndSubGroup(User user, string subGroup)
