@@ -35,7 +35,8 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
             {
                 Journal_Labs = new ObservableCollection<Journal_Lab>(db.Journals_Labs.Include(x => x.Journal).Include(x => x.Lab).Where(x => x.JournalId == Journal.Id));
                 Marks = new ObservableCollection<Mark>(db.Marks.Where(x => x.Journal_Lab.JournalId == Journal.Id));
-                Students = new ObservableCollection<Student>(db.Students.Where(x => x.GroupId == Journal.GroupId && x.SubGroup == Journal.SubGroup));
+                Students = new ObservableCollection<Student>(db.Students.Where(x => x.GroupId == Journal.GroupId && x.SubGroup == Journal.SubGroup)
+                    .OrderBy(x => x.Surname).ThenBy(x => x.FirstName).ThenBy(x => x.SecondName));
             }
 
             DataTable = new DataTable();
@@ -55,16 +56,16 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
             //Students = new ObservableCollection<Student>() { new Student(0, "asd", "asd", "asdasd", "1") };
             //Marks = new ObservableCollection<Mark>() { new Mark() { Student = Students.First(), Journal_Lab = Journal_Labs.First(), PracticeState = "з." } };
 
-            foreach (var student in Students)
+            for (int i = 0; i < Students.Count; i++)
             {
                 var row = DataTable.NewRow();
 
-                row["№"] = "1";
-                row["ФИО"] = ShortFullName(student);
-                row["Д"] = "213";
+                row["№"] = i + 1;
+                row["ФИО"] = ShortFullName(Students[i]);
+                row["Д"] = "";
 
                 foreach (var journal_lab in Journal_Labs)
-                    row[journal_lab.Lab.Number.ToString()] = Marks.First().PracticeState;
+                    row[journal_lab.Lab.Number.ToString()] = Marks.FirstOrDefault()?.PracticeState;
 
                 DataTable.Rows.Add(row);
             }
