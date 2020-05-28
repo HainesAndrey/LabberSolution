@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 
 namespace LabberClient.Workspace.JournalsTab.JournalTable
 {
@@ -15,65 +16,37 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
         {
             InitializeComponent();
             DataContext = new JournalTablePageVM(journal, responseEvent, pageEnabledEvent, loadingStateEvent, completeStateEvent);
+            (DataContext as JournalTablePageVM).UpdateHeaders += JournalTablePage_UpdateHeaders;
         }
 
-        //private void SetTrueMark(object sender, System.Windows.RoutedEventArgs e)
-        //{
-        //    foreach (var row in table.SelectedCells.Select(x => (DataRowView)x.Item).Distinct())
-        //    {
-        //        var arr = row.Row.ItemArray;
-        //        foreach (var index in table.SelectedCells.Where(x => (DataRowView)x.Item == row).Select(x => x.Column.DisplayIndex).Where(x => x > 1))
-        //        {
-        //            Mark mark = new Mark()
-        //            {
-
-        //            }
-        //            parametres.Add("fullNameStud", arr[1].ToString());
-        //            parametres.Add("idTgs", currentJournal.Id);
-        //            parametres.Add("numLab", int.Parse(table.Columns[index].Header.ToString()));
-        //            if ((arr[index] is null) || ((string)arr[index] != "зач"))
-        //            {
-        //                if (!(arr[index] is null) && ((string)arr[index] != ""))
-        //                    (DataContext as JournalTablePageVM).SetTrueMarkBody();
-
-        //                arr[index] = "зач";
-        //                parametres.Add("state", "зач");
-        //                db.CallProcedure("InsertStLab", ref parametres);
-        //            }
-        //            else
-        //            {
-        //                arr[index] = "";
-        //                db.CallProcedure("DeleteStLab", ref parametres);
-        //            }
-        //        }
-
-
-        //        row.Row.ItemArray = arr;
-        //    }
-        //}
-
-        //private void MoreInfo(object sender, System.Windows.RoutedEventArgs e)
-        //{
-
-        //}
+        private void JournalTablePage_UpdateHeaders(DataTable datatable)
+        {
+            table.ItemsSource = datatable.DefaultView;
+            foreach (var item in table.Columns)
+            {
+                item.Header = datatable.Columns[item.Header.ToString()].Caption;
+            }
+        }
 
         private void DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
+            if (!(DataContext as JournalTablePageVM).CanEdit)
+                return;
             List<Mark> marks = new List<Mark>();
             foreach (var row in table.SelectedCells.Select(x => (DataRowView)x.Item).Distinct())
             {
                 var arr = row.Row.ItemArray;
                 foreach (var index in table.SelectedCells.Where(x => (DataRowView)x.Item == row).Select(x => x.Column.DisplayIndex).Where(x => x > 2))
                 {
-                    marks.Add((DataContext as JournalTablePageVM).Marks.FirstOrDefault(x => x.Journal_Lab == (DataContext as JournalTablePageVM).Journal_Labs.First(x => x.Lab.Number.ToString() == table.Columns[index].Header.ToString())
+                    marks.Add((DataContext as JournalTablePageVM).Marks.FirstOrDefault(x => x.Journal_Lab == (DataContext as JournalTablePageVM).Journal_Labs.First(x => Journal_LabToString(x) == table.Columns[index].Header.ToString())
                     && x.Student == (DataContext as JournalTablePageVM).Students.First(x => ShortFullName(x) == arr[1].ToString())));
                     if (marks?.FirstOrDefault() == null)
                     {
                         marks.Clear();
                         var mark = new Mark()
                         {
-                            Journal_LabId = (DataContext as JournalTablePageVM).Journal_Labs.First(x => x.Lab.Number.ToString() == table.Columns[index].Header.ToString()).Id,
-                            StudentId = (DataContext as JournalTablePageVM).Students.First(x => ShortFullName(x) == arr[1].ToString()).Id,
+                            Journal_LabId = (DataContext as JournalTablePageVM).Journal_Labs.FirstOrDefault(x => Journal_LabToString(x) == table.Columns[index].Header.ToString())?.Id ?? 0,
+                            StudentId = (DataContext as JournalTablePageVM).Students.FirstOrDefault(x => ShortFullName(x) == arr[1].ToString())?.Id ?? 0,
                         };
                         mark.Date = (DataContext as JournalTablePageVM).Journal_Labs.FirstOrDefault(x => x.Id == mark.Journal_LabId).Date;
                         marks.Add(mark);
@@ -111,9 +84,9 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
             (DataContext as JournalTablePageVM).SetTrueMark();
         }
 
-        private void MarkState_Click(object sender, RoutedEventArgs e)
-        {
+        //private void MarkState_Click(object sender, RoutedEventArgs e)
+        //{
 
-        }
+        //}
     }
 }

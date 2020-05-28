@@ -2,10 +2,12 @@
 using LabberLib.DataBaseContext;
 using LabberLib.DataBaseContext.Entities;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace LabberClient.Workspace.JournalsTab.JournalTable
 {
@@ -13,30 +15,34 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
     {
         private Journal journal;
         private DataTable dataTable;
+        private Visibility trueStateClickState;
 
         public Journal Journal { get => journal; set { journal = value; RaisePropertyChanged("Journal"); } }
 
         public ObservableCollection<Journal_Lab> Journal_Labs { get; set; }
         public ObservableCollection<Mark> Marks { get; set; }
         public ObservableCollection<Student> Students { get; set; }
-        public DataTable DataTable { get => dataTable; set { dataTable = value; RaisePropertyChanged("DataTable"); } }
+        //public DataTable DataTable { get => dataTable; set { dataTable = value; RaisePropertyChanged("DataTable"); } }
+        public bool CanEdit { get; set; }
+        public Visibility TrueStateClickState { get => trueStateClickState; set { trueStateClickState = value; RaisePropertyChanged("TrueStateClickState"); } }
 
         public Mark CurrentMark { get; set; }
+
+        public delegate void UpdateHeadersEventHandler(DataTable table);
+        public event UpdateHeadersEventHandler UpdateHeaders;
 
         public JournalTablePageVM(Journal journal, ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
             Journal = journal;
-        }
-
-        private void SetTrueMarkBody()
-        {
-            
+            CanEdit = DBWorker.UserId == Journal.UserId;
+            TrueStateClickState = CanEdit ? Visibility.Visible : Visibility.Hidden;
         }
 
         public async override void LoadData()
         {
             await Refresh();
+            UpdateHeaders?.Invoke(dataTable);
         }
 
         private Task Refresh()
@@ -58,7 +64,7 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
                 datatable.Columns.Add(new DataColumn("Д"));
 
                 foreach (var journal_lab in Journal_Labs)
-                    datatable.Columns.Add(new DataColumn() { ColumnName = journal_lab.Lab.Number.ToString() });
+                    datatable.Columns.Add(new DataColumn() { ColumnName = journal_lab.Id.ToString(), Caption = Journal_LabToString(journal_lab) });
 
                 for (int i = 0; i < Students.Count; i++)
                 {
@@ -66,18 +72,18 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
 
                     row["№"] = i + 1;
                     row["ФИО"] = ShortFullName(Students[i]);
-                    row["Д"] = "";
+                    row["Д"] = Marks.Where(x => x.StudentId == Students[i].Id).Count(x => DateTime.Parse(x.Journal_Lab.Date) < DateTime.Now.Date);
 
                     foreach (var journal_lab in Journal_Labs)
-                        row[journal_lab.Lab.Number.ToString()] = Marks.FirstOrDefault(x => x.StudentId == Students[i].Id)?.PracticeState;
+                        row[journal_lab.Id.ToString()] = Marks.FirstOrDefault(x => x.StudentId == Students[i].Id && x.Journal_LabId == journal_lab.Id)?.PracticeState == "з." ? "зач" : "";
 
                     datatable.Rows.Add(row);
                 }
-                DataTable = datatable;
+                dataTable = datatable;
             });
         }
 
-        public void SetTrueMark()
+        public async void SetTrueMark()
         {
             using (db = new DBWorker())
             {
@@ -95,7 +101,8 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
                         mark.PracticeState = "";
                 }
             }
-            Refresh();
+            await Refresh();
+            UpdateHeaders?.Invoke(dataTable);
         }
 
         private string Journal_LabToString(Journal_Lab journal_lab)

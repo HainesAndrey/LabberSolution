@@ -22,13 +22,14 @@ namespace LabberClient.Workspace.LabsTab
         private List<Journal_Lab> labs;
         private Journal currentJournal;
         private Journal_Lab currentItem;
+        private bool tableEnabled = false;
 
         public string AddSaveBtnTitle { get => addSaveBtnTitle; set { addSaveBtnTitle = value; RaisePropertyChanged("AddSaveBtnTitle"); } }
         public string Number { get => number; set { number = value; RaisePropertyChanged("Number"); } }
         public DateTime Date { get => date; set { date = value; RaisePropertyChanged("Date"); } }
-        public Journal CurrentJournal { get => currentJournal; set { currentJournal = value; RaisePropertyChanged("CurrentJournal"); } }
+        public bool TableEnabled { get => tableEnabled; set { tableEnabled = value; RaisePropertyChanged("TableEnabled"); } }
 
-        //public List<Journal> Journals { get; set; } = new List<Journal>();
+        public Journal CurrentJournal { get => currentJournal; set { currentJournal = value; RaisePropertyChanged("CurrentJournal"); } }
         public List<Journal_Lab> Items { get => labs; set { labs = value; RaisePropertyChanged("Items"); } }
         public Journal_Lab CurrentItem { get => currentItem; set { currentItem = value; RaisePropertyChanged("CurrentItem"); } }
 
@@ -46,15 +47,6 @@ namespace LabberClient.Workspace.LabsTab
         public LabsTabPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            //isAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;
-            
-            //using (db = new DBWorker())
-            //{
-            //    Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList();
-            //    //Items = db.Journals_Labs.Include(x => x.Journal)
-            //    //.Include(x => x.Lab).ToList().Where(x => x.JournalId == CurrentJournal.Id).ToList();
-            //}
-            
             Add = new MvxCommand(AddBody);
             Change = new MvxCommand(ChangeBody);
             Delete = new MvxCommand(DeleteBody);
@@ -69,6 +61,7 @@ namespace LabberClient.Workspace.LabsTab
         private void LabsTabPageVM_SelectedJournal(Journal journal)
         {
             CurrentJournal = journal;
+            TableEnabled = true;
             Refresh();
         }
 
@@ -80,7 +73,7 @@ namespace LabberClient.Workspace.LabsTab
         }
 
         private async void Refresh()
-        {   
+        {
             await Task.Run(() =>
             {
                 using (db = new DBWorker())
@@ -91,7 +84,7 @@ namespace LabberClient.Workspace.LabsTab
                             .Include(x => x.Lab).ToList().Where(x => x.JournalId == CurrentJournal.Id).ToList();
                 }
             });
-            
+
             //GroupByGroups.Execute();
         }
 

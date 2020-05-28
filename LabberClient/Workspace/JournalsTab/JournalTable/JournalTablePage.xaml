@@ -26,11 +26,10 @@
             AlternatingRowBackground="WhiteSmoke"
             VerticalScrollBarVisibility="Visible"
             HorizontalScrollBarVisibility="Visible"
-            SelectedCellsChanged="DataGrid_SelectedCellsChanged"
-            ItemsSource="{Binding DataTable.DefaultView}">
-            <!--<DataGrid.Resources>
+            SelectedCellsChanged="DataGrid_SelectedCellsChanged">
+            <DataGrid.Resources>
                 <Style TargetType="DataGridColumnHeader">
-                    --><!--<Style.Triggers>
+                    <Style.Triggers>
                         <Trigger Property="Content" Value="№">
                             <Setter Property="TextBlock.TextAlignment" Value="Right"/>
                         </Trigger>
@@ -42,11 +41,12 @@
                         <Trigger Property="Content" Value="Д">
                             <Setter Property="TextBlock.TextAlignment" Value="Center"/>
                         </Trigger>
-                    </Style.Triggers>--><!--
+                    </Style.Triggers>
                     <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                    <Setter Property="TextBlock.Text" Value="{Binding Caption}"/>
                 </Style>
 
-                --><!--<Style TargetType="DataGridCell">
+                <Style TargetType="DataGridCell">
                     <Setter Property="TextBlock.VerticalAlignment" Value="Center"/>
                     <Style.Triggers>
                         <Trigger Property="DataGridColumn.DisplayIndex" Value="0">
@@ -61,17 +61,17 @@
                             <Setter Property="TextBlock.TextAlignment" Value="Left"/>
                         </Trigger>
                     </Style.Triggers>
-                </Style>--><!--
-            </DataGrid.Resources>-->
+                </Style>
+            </DataGrid.Resources>
             <DataGrid.ContextMenu>
-                <ContextMenu>
+                <ContextMenu Visibility="{Binding TrueStateClickState }">
                     <MenuItem
                         Header="Зач/незач"
                         Click="TrueState_Click"/>
                     
-                    <MenuItem
+                    <!--<MenuItem
                         Header="Доп. информация"
-                        Click="MarkState_Click"/>
+                        Click="MarkState_Click"/>-->
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>
