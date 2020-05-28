@@ -113,5 +113,10 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
         {
             return $"{student.Surname} {student.FirstName[0]}.{student.SecondName[0]}.";
         }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            (DataContext as LabberVMBase).LoadData();
+        }
     }
 }

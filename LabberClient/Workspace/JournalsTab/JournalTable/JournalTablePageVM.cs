@@ -8,67 +8,80 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
-using System.Windows.Controls;
+using System.Threading.Tasks;
 
 namespace LabberClient.Workspace.JournalsTab.JournalTable
 {
     public class JournalTablePageVM : LabberVMBase
     {
         private Journal journal;
+        private DataTable dataTable;
+
         public Journal Journal { get => journal; set { journal = value; RaisePropertyChanged("Journal"); } }
 
         public ObservableCollection<Journal_Lab> Journal_Labs { get; set; }
         public ObservableCollection<Mark> Marks { get; set; }
         public ObservableCollection<Student> Students { get; set; }
-        public DataTable DataTable { get; set; }
+        public DataTable DataTable { get => dataTable; set { dataTable = value; RaisePropertyChanged("DataTable"); } }
 
         public List<Mark> CurrentItems { get; set; }
 
-        //public MvxCommand SetTrueMark { get; set; }
+        public MvxCommand SetTrueMark { get; set; }
 
         public JournalTablePageVM(Journal journal, ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
             Journal = journal;
+            SetTrueMark = new MvxCommand(SetTrueMarkBody);
 
-            using (db = new DBWorker())
+            //Refresh().Wait();
+        }
+
+        private void SetTrueMarkBody()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async override void LoadData()
+        {
+            await Refresh();
+        }
+
+        private Task Refresh()
+        {
+            return Task.Run(() =>
             {
-                Journal_Labs = new ObservableCollection<Journal_Lab>(db.Journals_Labs.Include(x => x.Journal).Include(x => x.Lab).Where(x => x.JournalId == Journal.Id));
-                Marks = new ObservableCollection<Mark>(db.Marks.Where(x => x.Journal_Lab.JournalId == Journal.Id));
-                Students = new ObservableCollection<Student>(db.Students.Where(x => x.GroupId == Journal.GroupId && x.SubGroup == Journal.SubGroup)
-                    .OrderBy(x => x.Surname).ThenBy(x => x.FirstName).ThenBy(x => x.SecondName));
-            }
+                using (db = new DBWorker())
+                {
+                    Journal_Labs = new ObservableCollection<Journal_Lab>(db.Journals_Labs.Include(x => x.Journal).Include(x => x.Lab).Where(x => x.JournalId == Journal.Id));
+                    Marks = new ObservableCollection<Mark>(db.Marks.Where(x => x.Journal_Lab.JournalId == Journal.Id));
+                    Students = new ObservableCollection<Student>(db.Students.Where(x => x.GroupId == Journal.GroupId && x.SubGroup == Journal.SubGroup)
+                        .OrderBy(x => x.Surname).ThenBy(x => x.FirstName).ThenBy(x => x.SecondName));
+                }
 
-            DataTable = new DataTable();
+                DataTable = new DataTable();
 
-            //SetTrueMark = new MvxCommand(SetTrueMarkBody);
-
-            DataTable.Columns.Add(new DataColumn("№"));
-            DataTable.Columns.Add(new DataColumn("ФИО"));
-            DataTable.Columns.Add(new DataColumn("Д"));
-
-            //Journal_Labs = new ObservableCollection<Journal_Lab>() { new Journal_Lab() { Date = $"{DateTime.Now.ToString("dd.MM.yy")}", Lab = new Lab(1, "asdas") } };
-
-            foreach (var journal_lab in Journal_Labs)
-                DataTable.Columns.Add(new DataColumn() { ColumnName = journal_lab.Lab.Number.ToString() });
-
-
-            //Students = new ObservableCollection<Student>() { new Student(0, "asd", "asd", "asdasd", "1") };
-            //Marks = new ObservableCollection<Mark>() { new Mark() { Student = Students.First(), Journal_Lab = Journal_Labs.First(), PracticeState = "з." } };
-
-            for (int i = 0; i < Students.Count; i++)
-            {
-                var row = DataTable.NewRow();
-
-                row["№"] = i + 1;
-                row["ФИО"] = ShortFullName(Students[i]);
-                row["Д"] = "";
+                DataTable.Columns.Add(new DataColumn("№"));
+                DataTable.Columns.Add(new DataColumn("ФИО"));
+                DataTable.Columns.Add(new DataColumn("Д"));
 
                 foreach (var journal_lab in Journal_Labs)
-                    row[journal_lab.Lab.Number.ToString()] = Marks.FirstOrDefault()?.PracticeState;
+                    DataTable.Columns.Add(new DataColumn() { ColumnName = journal_lab.Lab.Number.ToString() });
 
-                DataTable.Rows.Add(row);
-            }
+                for (int i = 0; i < Students.Count; i++)
+                {
+                    var row = DataTable.NewRow();
+
+                    row["№"] = i + 1;
+                    row["ФИО"] = ShortFullName(Students[i]);
+                    row["Д"] = "";
+
+                    foreach (var journal_lab in Journal_Labs)
+                        row[journal_lab.Lab.Number.ToString()] = Marks.FirstOrDefault()?.PracticeState;
+
+                    DataTable.Rows.Add(row);
+                }
+            });
         }
 
         public void SetTrueMarkBody(Mark mark)
@@ -90,7 +103,10 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
 
         private string ShortFullName(Student student)
         {
-            return $"{student.Surname} {student.FirstName[0]}.{student.SecondName[0]}.";
+            if (student.SecondName != "")
+                return $"{student.Surname} {student.FirstName[0]}.{student.SecondName?[0]}.";
+            else
+                return $"{student.Surname} {student.FirstName[0]}";
         }
     }
 }

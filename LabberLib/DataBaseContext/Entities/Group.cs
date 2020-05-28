@@ -5,6 +5,11 @@
         public uint Id { get; set; }
         public string Title { get; set; }
 
+        public Group()
+        {
+
+        }
+
         public Group(string title)
         {
             Title = title;
