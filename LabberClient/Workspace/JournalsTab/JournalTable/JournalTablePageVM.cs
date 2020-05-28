@@ -72,7 +72,17 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
 
                     row["№"] = i + 1;
                     row["ФИО"] = ShortFullName(Students[i]);
-                    row["Д"] = Marks.Where(x => x.StudentId == Students[i].Id).Count(x => DateTime.Parse(x.Journal_Lab.Date) < DateTime.Now.Date);
+
+                    uint debts = 0;
+                    foreach (var journal_lab in Journal_Labs)
+                    {
+                        var state = Marks.FirstOrDefault(x => x.StudentId == Students[i].Id && x.Journal_LabId == journal_lab.Id)?.PracticeState;
+                        if (DateTime.Parse(journal_lab.Date) < DateTime.Now.Date && (state == null || state == ""))
+                            debts++;
+                    }
+                        
+
+                    row["Д"] = debts;
 
                     foreach (var journal_lab in Journal_Labs)
                         row[journal_lab.Id.ToString()] = Marks.FirstOrDefault(x => x.StudentId == Students[i].Id && x.Journal_LabId == journal_lab.Id)?.PracticeState == "з." ? "зач" : "";

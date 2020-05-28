@@ -1,5 +1,6 @@
 ﻿using LabberClient.VMStuff;
 using LabberClient.Workspace.AdminTab;
+using LabberClient.Workspace.DebtsTab;
 using LabberClient.Workspace.JournalsTab;
 using LabberClient.Workspace.LabsTab;
 using LabberLib.DataBaseContext;
@@ -15,7 +16,7 @@ namespace LabberClient.Workspace
 
         public JournalsTabPage JournalsTabPage { get; set; }
         public LabsTabPage LabsTabPage { get; set; }
-        public int DebtsTabPage { get; set; }
+        public DebtsTabPage DebtsTabPage { get; set; }
         public AdminTabPage AdminTabPage { get; set; }
 
         public Visibility LabsTabPageVisibility { get => labsTabPageVisibility; set { labsTabPageVisibility = value; RaisePropertyChanged("LabsTabPageVisibility"); } }
@@ -34,15 +35,11 @@ namespace LabberClient.Workspace
             }
 
             JournalsTabPage = new JournalsTabPage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
-
+            DebtsTabPage = new DebtsTabPage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
             if (isAdmin)
-            {
                 AdminTabPage = new AdminTabPage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
-            }
             else
-            {
                 LabsTabPage = new LabsTabPage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
-            }
         }
     }
 }

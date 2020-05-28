@@ -1,0 +1,41 @@
+﻿<Page
+    x:Class="LabberClient.Workspace.DebtsTab.DebtsTabPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    mc:Ignorable="d" 
+    Title="DebtsTabPage">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        
+        <Frame
+            Focusable="False"
+            NavigationUIVisibility="Hidden"
+            IsManipulationEnabled="False"
+            Content="{Binding JournalsSelector}"/>
+
+        <DataGrid
+            Grid.Column="1"
+            x:Name="table"
+            IsReadOnly="True"
+            HeadersVisibility="Column"
+            CanUserReorderColumns="False"
+            CanUserResizeColumns="False"
+            FrozenColumnCount="3"
+            SelectionMode="Single"
+            SelectionUnit="Cell"
+            BorderThickness="0"
+            HorizontalGridLinesBrush="LightGray"
+            VerticalGridLinesBrush="LightGray"
+            RowBackground="GhostWhite"
+            AlternatingRowBackground="WhiteSmoke"
+            VerticalScrollBarVisibility="Visible"
+            HorizontalScrollBarVisibility="Visible">
+        </DataGrid>
+    </Grid>
+</Page>
