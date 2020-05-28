@@ -66,10 +66,12 @@
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem
-                        Header="Зач/незач"/>
+                        Header="Зач/незач"
+                        Click="TrueState_Click"/>
                     
                     <MenuItem
-                        Header="Доп. информация"/>
+                        Header="Доп. информация"
+                        Click="MarkState_Click"/>
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>

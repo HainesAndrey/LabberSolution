@@ -2,9 +2,6 @@
 using LabberLib.DataBaseContext;
 using LabberLib.DataBaseContext.Entities;
 using Microsoft.EntityFrameworkCore;
-using MvvmCross.Commands;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
@@ -24,22 +21,17 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
         public ObservableCollection<Student> Students { get; set; }
         public DataTable DataTable { get => dataTable; set { dataTable = value; RaisePropertyChanged("DataTable"); } }
 
-        public List<Mark> CurrentItems { get; set; }
-
-        public MvxCommand SetTrueMark { get; set; }
+        public Mark CurrentMark { get; set; }
 
         public JournalTablePageVM(Journal journal, ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
             Journal = journal;
-            SetTrueMark = new MvxCommand(SetTrueMarkBody);
-
-            //Refresh().Wait();
         }
 
         private void SetTrueMarkBody()
         {
-            throw new NotImplementedException();
+            
         }
 
         public async override void LoadData()
@@ -54,46 +46,56 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
                 using (db = new DBWorker())
                 {
                     Journal_Labs = new ObservableCollection<Journal_Lab>(db.Journals_Labs.Include(x => x.Journal).Include(x => x.Lab).Where(x => x.JournalId == Journal.Id));
-                    Marks = new ObservableCollection<Mark>(db.Marks.Where(x => x.Journal_Lab.JournalId == Journal.Id));
+                    Marks = new ObservableCollection<Mark>(db.Marks.Include(x => x.Journal_Lab).Where(x => x.Journal_Lab.JournalId == Journal.Id));
                     Students = new ObservableCollection<Student>(db.Students.Where(x => x.GroupId == Journal.GroupId && x.SubGroup == Journal.SubGroup)
                         .OrderBy(x => x.Surname).ThenBy(x => x.FirstName).ThenBy(x => x.SecondName));
                 }
 
-                DataTable = new DataTable();
+                var datatable = new DataTable();
 
-                DataTable.Columns.Add(new DataColumn("№"));
-                DataTable.Columns.Add(new DataColumn("ФИО"));
-                DataTable.Columns.Add(new DataColumn("Д"));
+                datatable.Columns.Add(new DataColumn("№"));
+                datatable.Columns.Add(new DataColumn("ФИО"));
+                datatable.Columns.Add(new DataColumn("Д"));
 
                 foreach (var journal_lab in Journal_Labs)
-                    DataTable.Columns.Add(new DataColumn() { ColumnName = journal_lab.Lab.Number.ToString() });
+                    datatable.Columns.Add(new DataColumn() { ColumnName = journal_lab.Lab.Number.ToString() });
 
                 for (int i = 0; i < Students.Count; i++)
                 {
-                    var row = DataTable.NewRow();
+                    var row = datatable.NewRow();
 
                     row["№"] = i + 1;
                     row["ФИО"] = ShortFullName(Students[i]);
                     row["Д"] = "";
 
                     foreach (var journal_lab in Journal_Labs)
-                        row[journal_lab.Lab.Number.ToString()] = Marks.FirstOrDefault()?.PracticeState;
+                        row[journal_lab.Lab.Number.ToString()] = Marks.FirstOrDefault(x => x.StudentId == Students[i].Id)?.PracticeState;
 
-                    DataTable.Rows.Add(row);
+                    datatable.Rows.Add(row);
                 }
+                DataTable = datatable;
             });
         }
 
-        public void SetTrueMarkBody(Mark mark)
+        public void SetTrueMark()
         {
             using (db = new DBWorker())
             {
-                if (mark.PracticeState != "")
-                    db.Marks.Add(mark);
+                if (CurrentMark.Id == 0)
+                {
+                    CurrentMark.PracticeState = "з.";
+                    db.Marks.Add(CurrentMark);
+                }
                 else
-                    db.Marks.Remove(mark);
-                db.SaveChanges();
+                {
+                    var mark = db.Marks.FirstOrDefault(x => x.Id == CurrentMark.Id);
+                    if (CurrentMark.PracticeState != "з.")
+                        mark.PracticeState = "з.";
+                    else
+                        mark.PracticeState = "";
+                }
             }
+            Refresh();
         }
 
         private string Journal_LabToString(Journal_Lab journal_lab)
