@@ -2,10 +2,13 @@
 using LabberLib.DataBaseContext;
 using LabberLib.DataBaseContext.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
 using MvvmCross.Commands;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -22,7 +25,7 @@ namespace LabberClient.Workspace.LabsTab
         private DateTime date = DateTime.Now;
         private List<Journal_Lab> labs;
         private Journal currentJournal;
-        private Lab currentItem;
+        private Journal_Lab currentItem;
 
         public bool TreeEnabled { get => treeEnabled; set { treeEnabled = value; RaisePropertyChanged("TreeEnabled"); } }
         public bool LoadingState { get => loadingState; set { loadingState = value; RaisePropertyChanged("LoadingState"); } }
@@ -35,7 +38,7 @@ namespace LabberClient.Workspace.LabsTab
         public ObservableCollection<Node> Nodes { get => nodes; set { nodes = value; RaisePropertyChanged("Nodes"); } }
         public List<Journal> Journals { get; set; } = new List<Journal>();
         public List<Journal_Lab> Items { get => labs; set { labs = value; RaisePropertyChanged("Items"); } }
-        public Lab CurrentItem { get => currentItem; set { currentItem = value; RaisePropertyChanged("CurrentItem"); } }
+        public Journal_Lab CurrentItem { get => currentItem; set { currentItem = value; RaisePropertyChanged("CurrentItem"); } }
 
         public MvxCommand GroupByGroups { get; }
         public MvxCommand GroupBySubjects { get; }
@@ -60,12 +63,12 @@ namespace LabberClient.Workspace.LabsTab
             GroupBySubjects = new MvxCommand(GroupBySubjectsBody);
             GroupByTeachers = new MvxCommand(GroupByTeachersBody);
             ExpandAll = new MvxCommand<bool>(ExpandAllBody);
-            //Add = new MvxCommand(AddBody);
-            //Change = new MvxCommand(ChangeBody);
+            Add = new MvxCommand(AddBody);
+            Change = new MvxCommand(ChangeBody);
             Delete = new MvxCommand(DeleteBody);
             Clear = new MvxCommand(ClearBody);
             DeleteAll = new MvxCommand(DeleteAllBody);
-            //AddFromExcel = new MvxCommand(AddFromExcelBody);
+            AddFromExcel = new MvxCommand(AddFromExcelBody);
 
             GroupByGroups.Execute();
         }
@@ -86,7 +89,7 @@ namespace LabberClient.Workspace.LabsTab
                 {
                     isAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;
                     Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList();
-                    Items = db.Journals_Labs.Include(x => x.Lab).ToList().Where(x => x.JournalId == CurrentJournal.Id).ToList();
+                    Items = db.Journals_Labs.Include(x => x.Journal).Include(x => x.Lab).ToList().Where(x => x.JournalId == CurrentJournal.Id).ToList();
                 }
             });
 
@@ -112,136 +115,144 @@ namespace LabberClient.Workspace.LabsTab
         {
             using (db = new DBWorker())
             {
-                db.Labs.Remove(CurrentItem);
+                db.Labs.Remove(CurrentItem.Lab);
             }
             Refresh();
         }
 
-        //private void ChangeBody()
-        //{
-        //    DeleteAllEnabled = false;
-        //    DeleteEnabled = false;
-        //    Number = CurrentItem.Number.ToString();
-        //    Date = CurrentItem.Date;
-        //    AddSaveBtnTitle = "Сохранить";
-        //}
+        private void ChangeBody()
+        {
+            DeleteAllEnabled = false;
+            DeleteEnabled = false;
+            Number = CurrentItem.Lab.Number.ToString();
+            Date = DateTime.Parse(CurrentItem.Date);
+            AddSaveBtnTitle = "Сохранить";
+        }
 
-        //private async void AddBody()
-        //{
-        //    if (AddSaveBtnTitle == "Добавить")
-        //    {
-        //        if (Items.ToList().Exists(x => x.ShortTitle == ShortTitle))
-        //            InvokeResponseEvent(ResponseType.Bad, "Дисциплина с такой аббревиатурой уже добавлена");
-        //        else
-        //        {
-        //            InvokeLoadingStateEvent(true);
-        //            await Task.Run(() =>
-        //            {
-        //                using (db = new DBWorker())
-        //                {
-        //                    db.Subjects.Add(new Subject(ShortTitle, LongTitle));
-        //                }
-        //            });
-        //            Refresh();
-        //            InvokeLoadingStateEvent(false);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        InvokeLoadingStateEvent(true);
-        //        await Task.Run(() =>
-        //        {
-        //            using (db = new DBWorker())
-        //            {
-        //                var subject = db.Subjects.FirstOrDefault(x => x.ShortTitle == CurrentItem.ShortTitle && x.LongTitle == CurrentItem.LongTitle);
-        //                subject.ShortTitle = ShortTitle;
-        //                subject.LongTitle = LongTitle;
-        //            }
-        //        });
-        //        InvokeLoadingStateEvent(false);
-        //        Refresh();
+        private async void AddBody()
+        {
+            if (AddSaveBtnTitle == "Добавить")
+            {
+                if (Items.ToList().Exists(x => x.Lab.Number == double.Parse(Number)))
+                    InvokeResponseEvent(ResponseType.Bad, "Лабораторная работа с таким номером уже добавлена");
+                else
+                {
+                    InvokeLoadingStateEvent(true);
+                    await Task.Run(() =>
+                    {
+                        Lab lab = new Lab(double.Parse(Number), "");
+                        using (db = new DBWorker())
+                        {
+                            if (db.Labs.FirstOrDefault(x => x.Number == lab.Number) == null)
+                                db.Labs.Add(lab);
+                            else
+                                lab = db.Labs.ToList().First(x => x.Number == double.Parse(Number));
+                            db.SaveChanges();
+                            db.Journals_Labs.Include(x => x.Journal).Include(x => x.Lab);
+                            db.Journals_Labs.Add(new Journal_Lab() { JournalId = CurrentJournal.Id, Lab = lab, Date = Date.ToString("dd.MM.yyyy") });
+                            db.SaveChanges();
+                        }
+                    });
+                    Refresh();
+                    InvokeLoadingStateEvent(false);
+                }
+            }
+            else
+            {
+                //InvokeLoadingStateEvent(true);
+                //await Task.Run(() =>
+                //{
+                //    using (db = new DBWorker())
+                //    {
+                //        var subject = db.Subjects.FirstOrDefault(x => x.ShortTitle == CurrentItem.ShortTitle && x.LongTitle == CurrentItem.LongTitle);
+                //        subject.ShortTitle = ShortTitle;
+                //        subject.LongTitle = LongTitle;
+                //    }
+                //});
+                //InvokeLoadingStateEvent(false);
+                //Refresh();
 
-        //        AddSaveBtnTitle = "Добавить";
-        //        InvokeResponseEvent(ResponseType.Good, "Диспицлина успешно отредактирована");
-        //        Clear.Execute();
-        //        DeleteEnabled = true;
-        //        DeleteAllEnabled = true;
-        //    }
-        //}
+                //AddSaveBtnTitle = "Добавить";
+                //InvokeResponseEvent(ResponseType.Good, "Диспицлина успешно отредактирована");
+                //Clear.Execute();
+                //DeleteEnabled = true;
+                //DeleteAllEnabled = true;
+            }
+        }
 
-        //private async void AddFromExcelBody()
-        //{
-        //    OpenFileDialog openFileDialog = new OpenFileDialog()
-        //    {
-        //        InitialDirectory = "shell:MyComputerFolder",
-        //        DefaultExt = ".xlsx",
-        //        Title = "Выберите файл Excel",
-        //        Filter = "Файл Excel|*.xlsx"
-        //    };
-        //    if ((bool)openFileDialog.ShowDialog())
-        //    {
-        //        InvokeLoadingStateEvent(true);
-        //        InvokePageEnabledEvent(false);
-        //        object[,] arr = null;
-        //        try
-        //        {
-        //            await Task.Run(() =>
-        //            {
-        //                using (var fs = new FileStream(openFileDialog.FileName, FileMode.Open))
-        //                {
-        //                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-        //                    ExcelPackage excel = new ExcelPackage(fs);
-        //                    excel.Load(fs);
+        private async void AddFromExcelBody()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                InitialDirectory = "shell:MyComputerFolder",
+                DefaultExt = ".xlsx",
+                Title = "Выберите файл Excel",
+                Filter = "Файл Excel|*.xlsx"
+            };
+            if ((bool)openFileDialog.ShowDialog())
+            {
+                InvokeLoadingStateEvent(true);
+                InvokePageEnabledEvent(false);
+                object[,] arr = null;
+                try
+                {
+                    await Task.Run(() =>
+                    {
+                        using (var fs = new FileStream(openFileDialog.FileName, FileMode.Open))
+                        {
+                            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                            ExcelPackage excel = new ExcelPackage(fs);
+                            excel.Load(fs);
 
-        //                    try
-        //                    {
-        //                        arr = (object[,])excel.Workbook.Worksheets[0].Cells.Value;
-        //                    }
-        //                    catch (InvalidOperationException)
-        //                    {
-        //                        InvokeResponseEvent(ResponseType.Bad, "Невозможно открыть файл, т.к. он поврежден");
-        //                        return;
-        //                    }
-        //                    excel.Dispose();
-        //                }
-        //            });
-        //        }
-        //        catch (IOException)
-        //        {
-        //            InvokeResponseEvent(ResponseType.Bad, "Невозможно открыть файл, т.к. он занят другим процессом");
-        //            InvokeLoadingStateEvent(false);
-        //            InvokePageEnabledEvent(true);
-        //            return;
-        //        }
+                            try
+                            {
+                                arr = (object[,])excel.Workbook.Worksheets[0].Cells.Value;
+                            }
+                            catch (InvalidOperationException)
+                            {
+                                InvokeResponseEvent(ResponseType.Bad, "Невозможно открыть файл, т.к. он поврежден");
+                                return;
+                            }
+                            excel.Dispose();
+                        }
+                    });
+                }
+                catch (IOException)
+                {
+                    InvokeResponseEvent(ResponseType.Bad, "Невозможно открыть файл, т.к. он занят другим процессом");
+                    InvokeLoadingStateEvent(false);
+                    InvokePageEnabledEvent(true);
+                    return;
+                }
 
-        //        if (arr is null)
-        //            InvokeResponseEvent(ResponseType.Bad, "Файл пуст");
-        //        else if (!(arr.GetLength(1) == 2))
-        //            InvokeResponseEvent(ResponseType.Bad, "Некорректный шаблон файла");
-        //        else
-        //        {
-        //            List<Subject> subjects = new List<Subject>();
-        //            await Task.Run(() =>
-        //            {
-        //                for (int i = 0; i < arr.GetLength(0); i++)
-        //                {
-        //                    var newsubj = new Subject(arr[i, 0].ToString(), arr[i, 1].ToString());
-        //                    if (!subjects.ToList().Exists(x => x.ShortTitle == newsubj.ShortTitle))
-        //                        subjects.Add(newsubj);
-        //                }
-        //                using (db = new DBWorker())
-        //                {
-        //                    db.Subjects.AddRange(subjects);
-        //                }
-        //            });
-        //            Refresh();
-        //            DeleteAllEnabled = true;
-        //            InvokeResponseEvent(ResponseType.Good, "Дисциплины успешно добавлены из файла");
-        //            InvokeLoadingStateEvent(false);
-        //            InvokePageEnabledEvent(true);
-        //        }
-        //    }
-        //}
+                if (arr is null)
+                    InvokeResponseEvent(ResponseType.Bad, "Файл пуст");
+                else if (!(arr.GetLength(1) == 2))
+                    InvokeResponseEvent(ResponseType.Bad, "Некорректный шаблон файла");
+                else
+                {
+                    List<Subject> subjects = new List<Subject>();
+                    await Task.Run(() =>
+                    {
+                        for (int i = 0; i < arr.GetLength(0); i++)
+                        {
+                            var newsubj = new Subject(arr[i, 0].ToString(), arr[i, 1].ToString());
+                            if (!subjects.ToList().Exists(x => x.ShortTitle == newsubj.ShortTitle))
+                                subjects.Add(newsubj);
+                        }
+                        using (db = new DBWorker())
+                        {
+                            db.Subjects.AddRange(subjects);
+                        }
+                    });
+                    Refresh();
+                    DeleteAllEnabled = true;
+                    InvokeResponseEvent(ResponseType.Good, "Дисциплины успешно добавлены из файла");
+                    InvokeLoadingStateEvent(false);
+                    InvokePageEnabledEvent(true);
+                }
+            }
+        }
 
 
 

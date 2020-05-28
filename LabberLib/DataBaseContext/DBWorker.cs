@@ -135,6 +135,7 @@ namespace LabberLib.DataBaseContext
             {
                 l.ToTable("labs");
                 l.Property(x => x.Title).HasColumnType("varchar(15)");
+                l.HasIndex(x => x.Number).IsUnique();
             });
         }
         private static void MarksModel(ModelBuilder modelBuilder)
