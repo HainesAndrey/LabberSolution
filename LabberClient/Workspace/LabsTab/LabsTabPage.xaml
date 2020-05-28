@@ -5,112 +5,20 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     mc:Ignorable="d" 
-    Title="LabsTabPage" Loaded="Page_Loaded">
+    Title="LabsTabPage"
+    x:Name="page">
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="210"/>
+            <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        
-        <DockPanel
-            Margin="5 10 0 5">
-            <GroupBox
-                DockPanel.Dock="Top"
-                Margin="0 0 0 5"
-                Header="Группировка по:">
-                <WrapPanel
-                    Orientation="Horizontal">
-                    <RadioButton
-                        Content="Группам"
-                        Margin="2 3"
-                        IsChecked="True"
-                        Command="{Binding GroupByGroups}"/>
 
-                    <RadioButton
-                        Content="Предметам"
-                        Margin="2 3"
-                        Command="{Binding GroupBySubjects}"/>
-
-                    <RadioButton
-                        Content="Преподавателям"
-                        Margin="2 3"
-                        Command="{Binding GroupByTeachers}"/>
-                </WrapPanel>
-            </GroupBox>
-
-            <!--<GroupBox
-                DockPanel.Dock="Top"
-                Grid.Row="1"
-                Margin="0 0 0 10"
-                Header="Фильтрация:">
-                <StackPanel>
-                    <RadioButton
-                        Content="Мои журналы"
-                        Margin="2 3"
-                        IsChecked="True"
-                        Command="{Binding FilterByOwn}"/>
-
-                    <RadioButton
-                        Content="Все журналы"
-                        Margin="2 3"
-                        Command="{Binding FilterByAll}"/>
-                </StackPanel>
-            </GroupBox>-->
-
-            <GroupBox
-                DockPanel.Dock="Top"
-                Grid.Row="2"
-                Header="Дерево журналов:">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition Height="3"/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-
-                    <CheckBox
-                        Margin="2 3"
-                        Content="Раскрыть все ветви"
-                        IsChecked="{Binding NeedToExpandAll}"
-                        Command="{Binding ExpandAll}"
-                        CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"/>
-
-                    <ProgressBar
-                        Grid.Row="1"
-                        Height="3"
-                        Foreground="DodgerBlue"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Margin="2 0"
-                        IsIndeterminate="{Binding LoadingState}"/>
-
-                    <TreeView
-                        Grid.Row="2"
-                        Background="Transparent"
-                        BorderBrush="LightGray"
-                        Margin="2 0"
-                        BorderThickness="0 1 0 0"
-                        SelectedItemChanged="TreeView_SelectedItemChanged"
-                        ItemsSource="{Binding Nodes}"
-                        IsEnabled="{Binding TreeEnabled}">
-                        <TreeView.ItemTemplate>
-                            <HierarchicalDataTemplate ItemsSource="{Binding Nodes}">
-                                <StackPanel Orientation="Horizontal">
-                                    <Image Margin="0,0,5,0" />
-                                    <TextBlock Text="{Binding Title}" Margin="0,0,4,0" />
-                                </StackPanel>
-                            </HierarchicalDataTemplate>
-                        </TreeView.ItemTemplate>
-                        <TreeView.ItemContainerStyle>
-                            <Style TargetType="TreeViewItem">
-                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                            </Style>
-                        </TreeView.ItemContainerStyle>
-                    </TreeView>
-                </Grid>
-            </GroupBox>
-        </DockPanel>
+        <Frame
+            Focusable="False"
+            NavigationUIVisibility="Hidden"
+            IsManipulationEnabled="False"
+            Content="{Binding JournalsSelectorPage}"/>
 
         <Grid
             Grid.Column="1"

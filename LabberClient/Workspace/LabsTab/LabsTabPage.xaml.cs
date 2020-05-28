@@ -11,11 +11,6 @@ namespace LabberClient.Workspace.LabsTab
             DataContext = new LabsTabPageVM(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
         }
 
-        private void TreeView_SelectedItemChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<object> e)
-        {
-            (DataContext as LabsTabPageVM).OpenNewJournal((e.NewValue as Node).IdJournal);
-        }
-
         private void Page_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
             (DataContext as LabberVMBase).LoadData();
