@@ -7,15 +7,29 @@
     mc:Ignorable="d" 
     Title="LabsTabPage"
     x:Name="page"
-    Loaded="Page_Loaded">
+    Loaded="Page_Loaded"
+    Background="GhostWhite">
+
+    <Page.Effect>
+    <DropShadowEffect
+            BlurRadius="20"
+            ShadowDepth="0"
+            Opacity="0.7"/>
+    </Page.Effect>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="230"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
+        <Border
+            BorderBrush="Gray"
+            Grid.ColumnSpan="2"
+            BorderThickness="1"/>
+
         <Frame
+            Margin="10"
             Focusable="False"
             NavigationUIVisibility="Hidden"
             IsManipulationEnabled="False"

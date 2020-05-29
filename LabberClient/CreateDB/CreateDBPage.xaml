@@ -4,11 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-    mc:Ignorable="d" 
-    Width="700"
+    mc:Ignorable="d"
     Title="CreateDBPage"
     x:Name="page"
-    Loaded="page_Loaded">
+    Loaded="page_Loaded"
+    Background="GhostWhite"
+    HorizontalAlignment="Center">
     
     <Page.Effect>
         <DropShadowEffect
@@ -17,8 +18,7 @@
             Opacity="0.7"/>
     </Page.Effect>
     
-    <Grid
-        Background="GhostWhite">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="45"/>
@@ -47,47 +47,46 @@
             </TextBlock.Effect>
         </TextBlock>
 
-        <StackPanel
+        <DockPanel
             Grid.Row="1"
-            HorizontalAlignment="Left"
             Margin="20 0">
             <TextBlock
+                DockPanel.Dock="Top"
                 Text="Название файла новой базы данных:"
                 FontSize="14"/>
 
             <TextBox
-                Margin="0 2 0 0"
-                Width="659"
+                DockPanel.Dock="Top"
                 VerticalAlignment="Bottom"
                 Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged}"
                 FontSize="14"
                 Foreground="DodgerBlue"/>
-        </StackPanel>
+        </DockPanel>
 
-        <StackPanel
+        <DockPanel
             Grid.Row="2"
-            HorizontalAlignment="Left"
             Margin="20 0">
             <TextBlock
+                DockPanel.Dock="Top"
                 Text="Путь к файлу новой базы данных:"
                 FontSize="14"/>
-            <StackPanel
-                Orientation="Horizontal"
-                Margin="0 2 0 0">
+            <DockPanel>
+                <Button
+                    Margin="5 0 0 0"
+                    DockPanel.Dock="Right"
+                    VerticalAlignment="Bottom"
+                    Content="Обзор..."
+                    FontSize="14"
+                    Command="{Binding ShowFileDialog}"/>
                 <TextBox
-                    Width="590"
+                    DockPanel.Dock="Right"
+                    VerticalAlignment="Bottom"
                     Text="{Binding FullPath}"
                     FontSize="14"
                     IsReadOnly="True"
                     Foreground="Gray"/>
-                <Button
-                    Margin="5 0 0 0"
-                    Content="Обзор..."
-                    Width="64"
-                    FontSize="14"
-                    Command="{Binding ShowFileDialog}"/>
-            </StackPanel>
-        </StackPanel>
+            </DockPanel>
+        </DockPanel>
 
         <Grid
             Grid.Row="3"
