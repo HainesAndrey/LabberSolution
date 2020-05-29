@@ -68,9 +68,10 @@ namespace LabberClient.Workspace.LabsTab
 
         public override void LoadData()
         {
-            InvokeLoadingStateEvent(true);
+            //InvokeLoadingStateEvent(true);
             Refresh();
-            InvokeLoadingStateEvent(false);
+            (JournalsSelectorPage.DataContext as JournalsSelectorPageVM).NeedToDisplayAllJournals = false;
+            //InvokeLoadingStateEvent(false);
         }
 
         private async void Refresh()

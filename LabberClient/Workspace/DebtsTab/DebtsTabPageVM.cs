@@ -99,7 +99,7 @@ namespace LabberClient.Workspace.DebtsTab
                         uint countprevs = (uint)prev_journal_labs.Where(x => x.Journal.SubjectId == subject.Id && x.Journal.SubGroup == Students[i].SubGroup).Count();
                         var count = Marks.Where(x => x.StudentId == Students[i].Id && x.Journal_Lab.Journal.SubjectId == subject.Id).Count(x => x.PracticeState != "");
                         
-                        row[subject.Id.ToString()] = countprevs - count == 0 ? "" : (countprevs - count).ToString();
+                        row[subject.Id.ToString()] = countprevs - count <= 0 ? "" : (countprevs - count).ToString();
                         
                         if (row[subject.Id.ToString()].ToString() != "")
                             debts += uint.Parse(row[subject.Id.ToString()].ToString());

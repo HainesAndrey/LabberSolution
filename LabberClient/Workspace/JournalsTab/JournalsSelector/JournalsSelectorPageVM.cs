@@ -18,12 +18,15 @@ namespace LabberClient.Workspace.JournalsTab.JournalsSelector
         private Visibility filterEnabled;
         private ObservableCollection<Node> nodes;
         private bool needToExpandAll;
+        private bool isAdmin;
 
         public bool TreeEnabled { get => treeEnabled; set { treeEnabled = value; RaisePropertyChanged("TreeEnabled"); } }
         public bool LoadingState { get => loadingState; set { loadingState = value; RaisePropertyChanged("LoadingState"); } }
         public Visibility FilterEnabled { get => filterEnabled; set { filterEnabled = value; RaisePropertyChanged("FilterEnabled"); } }
         public bool NeedToExpandAll { get => needToExpandAll; set { needToExpandAll = value; RaisePropertyChanged("NeedToExpandAll"); } }
-        public bool IsAdmin { get; set; }
+        public bool IsAdmin { get => isAdmin;
+            set { isAdmin = value; FilterEnabled = isAdmin ? Visibility.Collapsed : Visibility.Visible; } }
+        public bool NeedToDisplayAllJournals { get; set; } = true;
 
         public MvxCommand GroupByGroups { get; set; }
         public MvxCommand GroupBySubjects { get; set; }
@@ -74,15 +77,17 @@ namespace LabberClient.Workspace.JournalsTab.JournalsSelector
             {
                 using (db = new DBWorker())
                 {
-                    IsAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;
+                    if (NeedToDisplayAllJournals)
+                        IsAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;
+                    else
+                        IsAdmin = true;
+
                     if (byOwn && !IsAdmin)
                         Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).Where(x => x.UserId == DBWorker.UserId).ToList();
                     else
                         Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList();
                 }
             });
-
-            FilterEnabled = IsAdmin ? Visibility.Collapsed : Visibility.Visible;
             GroupByGroups.Execute();
             //if (isAdmin)
             //    FilterByOwn.Execute();
@@ -104,9 +109,9 @@ namespace LabberClient.Workspace.JournalsTab.JournalsSelector
         }
 
         private async void GroupBy(
-            IEnumerable<(string title, uint secondId, uint thirdId, string subGroup)> first,
+            IEnumerable<(uint id, string title, uint secondId, uint thirdId, string subGroup)> first,
             IEnumerable<(uint id, string title, uint thirdId, string subGroup)> second,
-            IEnumerable<(uint id, string title, string subGroup, uint journalId)> third)
+            IEnumerable<(uint id, string title, uint secondId, string subGroup, uint journalId)> third)
         {
             //TreeEnabled = false;
             LoadingState = true;
@@ -120,7 +125,7 @@ namespace LabberClient.Workspace.JournalsTab.JournalsSelector
                     Nodes = new ObservableCollection<Node>(second.Where(s => f.ToList().Exists(s1 => s1.secondId == s.id && s1.subGroup == s.subGroup)).GroupBy(s => s.title).Select(s => new Node()
                     {
                         Title = s.Key,
-                        Nodes = new ObservableCollection<Node>(third.Where(t => s.ToList().Exists(t1 => t1.thirdId == t.id && t1.subGroup == t.subGroup)).Select(t => new Node()
+                        Nodes = new ObservableCollection<Node>(third.Where(t => s.ToList().Exists(t1 => t1.id == t.secondId && t1.thirdId == t.id && t1.subGroup == t.subGroup)).Select(t => new Node()
                         {
                             Title = t.title,
                             IdJournal = t.journalId,
@@ -138,23 +143,23 @@ namespace LabberClient.Workspace.JournalsTab.JournalsSelector
 
         private void GroupByTeachersBody()
         {
-            GroupBy(Journals.Select(x => (ShortFullName(x.User), x.SubjectId, x.GroupId, x.SubGroup)),
+            GroupBy(Journals.Select(x => (x.UserId, ShortFullName(x.User), x.SubjectId, x.GroupId, x.SubGroup)),
                 Journals.Select(x => (x.SubjectId, x.Subject.ShortTitle, x.GroupId, x.SubGroup)),
-                Journals.Select(x => (x.GroupId, $"{x.Group.Title} ({x.SubGroup}п/г)", x.SubGroup, x.Id)));
+                Journals.Select(x => (x.GroupId, $"{x.Group.Title} ({x.SubGroup}п/г)", x.SubjectId, x.SubGroup, x.Id)));
         }
 
         private void GroupBySubjectsBody()
         {
-            GroupBy(Journals.Select(x => (x.Subject.ShortTitle, x.UserId, x.GroupId, x.SubGroup)),
+            GroupBy(Journals.Select(x => (x.SubjectId, x.Subject.ShortTitle, x.UserId, x.GroupId, x.SubGroup)),
                 Journals.Select(x => (x.UserId, ShortFullName(x.User), x.GroupId, x.SubGroup)),
-                Journals.Select(x => (x.GroupId, $"{x.Group.Title} ({x.SubGroup}п/г)", x.SubGroup, x.Id)));
+                Journals.Select(x => (x.GroupId, $"{x.Group.Title} ({x.SubGroup}п/г)", x.UserId, x.SubGroup, x.Id)));
         }
 
         private void GroupByGroupsBody()
         {
-            GroupBy(Journals.Select(x => (x.Group.Title, x.SubjectId, x.UserId, x.SubGroup)),
+            GroupBy(Journals.Select(x => (x.GroupId, x.Group.Title, x.SubjectId, x.UserId, x.SubGroup)),
                 Journals.Select(x => (x.SubjectId, x.Subject.ShortTitle, x.UserId, x.SubGroup)),
-                Journals.Select(x => (x.UserId, ShortFullNameUserAndSubGroup(x.User, x.SubGroup), x.SubGroup, x.Id)));
+                Journals.Select(x => (x.UserId, ShortFullNameUserAndSubGroup(x.User, x.SubGroup), x.SubjectId, x.SubGroup, x.Id)));
         }
 
         private void FilterByAllBody()
