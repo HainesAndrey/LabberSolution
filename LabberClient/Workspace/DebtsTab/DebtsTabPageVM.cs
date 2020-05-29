@@ -18,6 +18,7 @@ namespace LabberClient.Workspace.DebtsTab
         private List<Group> groups;
         private bool tableEnabled = true;
         private DataTable dataTable;
+        private Group currentGroup;
 
         //public JournalsSelectorPage JournalsSelector { get; set; }
         public List<Group> Groups { get => groups; set { groups = value; RaisePropertyChanged("Groups"); } }
@@ -25,7 +26,15 @@ namespace LabberClient.Workspace.DebtsTab
         public List<Subject> Subjects { get; set; }
         public List<Mark> Marks { get; set; }
         public bool TableEnabled { get => tableEnabled; set { tableEnabled = value; RaisePropertyChanged("TableEnabled"); } }
-        public Group CurrentGroup { get; set; }
+        public Group CurrentGroup { get => currentGroup;
+            set {
+                currentGroup = value;
+                if (value != null)
+                {
+                    Refresh().Wait();
+                    UpdateTable?.Invoke(dataTable);
+                }
+                RaisePropertyChanged("CurrentGroup"); } }
 
         public delegate void UpdateTableEventHandler(DataTable table);
         public event UpdateTableEventHandler UpdateTable;
@@ -38,19 +47,22 @@ namespace LabberClient.Workspace.DebtsTab
 
         public override async void LoadData()
         {
-            await Refresh();
-            UpdateTable?.Invoke(dataTable);
+            RefreshGroups();
+            //await Refresh();
+            //UpdateTable?.Invoke(dataTable);
         }
-
+        private void RefreshGroups()
+        {
+            using (db = new DBWorker())
+            {
+                Groups = db.Groups.ToList().OrderBy(x => x.Title).ToList();
+            }
+        }
         private Task Refresh()
         {
             return Task.Run(() =>
             {
-                using (db = new DBWorker())
-                {
-                    Groups = db.Groups.ToList().OrderBy(x => x.Title).ToList();
-                }
-                CurrentGroup = Groups.FirstOrDefault();
+                //CurrentGroup = Groups.FirstOrDefault();
                 if (CurrentGroup == null)
                     return;
 
@@ -98,13 +110,13 @@ namespace LabberClient.Workspace.DebtsTab
                     {
                         uint countprevs = (uint)prev_journal_labs.Where(x => x.Journal.SubjectId == subject.Id && x.Journal.SubGroup == Students[i].SubGroup).Count();
                         var count = Marks.Where(x => x.StudentId == Students[i].Id && x.Journal_Lab.Journal.SubjectId == subject.Id).Count(x => x.PracticeState != "");
-                        
+
                         row[subject.Id.ToString()] = countprevs - count <= 0 ? "" : (countprevs - count).ToString();
-                        
+
                         if (row[subject.Id.ToString()].ToString() != "")
                             debts += uint.Parse(row[subject.Id.ToString()].ToString());
                     }
-                    row["Д"] = debts == 0 ? "" : debts.ToString() ; 
+                    row["Д"] = debts == 0 ? "" : debts.ToString();
 
                     datatable.Rows.Add(row);
                 }

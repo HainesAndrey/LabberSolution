@@ -114,9 +114,9 @@ namespace LabberClient.Students.StudentsTable
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
             var view1 = (CollectionView)CollectionViewSource.GetDefaultView(Items);
-            view1.SortDescriptions.Add(new SortDescription("SecondName", ListSortDirection.Ascending));
-            view1.SortDescriptions.Add(new SortDescription("FirtName", ListSortDirection.Ascending));
             view1.SortDescriptions.Add(new SortDescription("Surname", ListSortDirection.Ascending));
+            view1.SortDescriptions.Add(new SortDescription("FirtName", ListSortDirection.Ascending));
+            view1.SortDescriptions.Add(new SortDescription("SecondName", ListSortDirection.Ascending));
 
             var view2 = (CollectionView)CollectionViewSource.GetDefaultView(Groups);
             view2.SortDescriptions.Add(new SortDescription("Title", ListSortDirection.Ascending));

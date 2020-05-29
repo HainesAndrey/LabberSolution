@@ -5,10 +5,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     mc:Ignorable="d" 
-    d:DesignHeight="450" d:DesignWidth="800"
     Title="JournalTablePage"
     Loaded="Page_Loaded">
-
     <Grid>
         <DataGrid
             x:Name="table"
@@ -19,7 +17,8 @@
             FrozenColumnCount="3"
             SelectionMode="Single"
             SelectionUnit="Cell"
-            BorderThickness="0"
+            BorderThickness="0 0 0 1"
+            BorderBrush="LightGray"
             HorizontalGridLinesBrush="LightGray"
             VerticalGridLinesBrush="LightGray"
             RowBackground="GhostWhite"

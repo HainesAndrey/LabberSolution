@@ -26,20 +26,20 @@
                     ScrollViewer.CanContentScroll="False">
             <ListView.Resources>
                 <ContextMenu
-                            x:Key="RowMenu" 
-                            DataContext="{Binding PlacementTarget.Tag,
-                                RelativeSource={RelativeSource Self}}">
+                    x:Key="RowMenu" 
+                    DataContext="{Binding PlacementTarget.Tag,
+                        RelativeSource={RelativeSource Self}}">
                     <MenuItem
-                                Header="Редактировать"
-                                Command="{Binding ChangeUser}"/>
+                        Header="Редактировать"
+                        Command="{Binding ChangeUser}"/>
                     <MenuItem
-                                Header="Удалить"
-                                IsEnabled="{Binding DeleteUserEnabled}"
-                                Command="{Binding DeleteUser}"/>
+                        Header="Удалить"
+                        IsEnabled="{Binding DeleteUserEnabled}"
+                        Command="{Binding DeleteUser}"/>
                     <MenuItem
-                                Header="Удалить всё"
-                                Command="{Binding DeleteAll}"
-                                IsEnabled="{Binding DeleteAllEnabled}"/>
+                        Header="Удалить всё"
+                        Command="{Binding DeleteAll}"
+                        IsEnabled="{Binding DeleteAllEnabled}"/>
                 </ContextMenu>
 
                 <Style TargetType="{x:Type GridViewColumnHeader}">
@@ -87,6 +87,11 @@
                                 Header="Логин"/>
 
                     <GridViewColumn
+                                DisplayMemberBinding="{Binding Path=User.Password}"
+                                Width="120"
+                                Header="Пароль"/>
+
+                    <GridViewColumn
                                 Width="60">
                         <TextBlock Text="Админ." HorizontalAlignment="Center"/>
                         <GridViewColumn.CellTemplate>
@@ -123,6 +128,7 @@
                     Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="145"/>
+                <ColumnDefinition Width="120"/>
                 <ColumnDefinition Width="60"/>
                 <ColumnDefinition Width="145"/>
                 <ColumnDefinition Width="145"/>
@@ -172,6 +178,11 @@
                         BorderBrush="Gray"
                         BorderThickness="1 0 0 0"/>
 
+            <Border
+                        Grid.Column="5"
+                        BorderBrush="Gray"
+                        BorderThickness="1 0 0 0"/>
+
             <TextBox
                         Margin="4 0 3 0"
                         VerticalAlignment="Center"
@@ -179,29 +190,30 @@
                             
                         FontSize="14"/>
 
+
             <CheckBox
-                        Grid.Column="1"
+                        Grid.Column="2"
                         Margin="0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         IsChecked="{Binding IsAdmin, UpdateSourceTrigger=PropertyChanged}"/>
 
             <TextBox
-                        Grid.Column="2"
+                        Grid.Column="3"
                         Margin="4 0 3 0"
                         VerticalAlignment="Center"
                         Text="{Binding Surname, UpdateSourceTrigger=PropertyChanged}"
                         FontSize="14"/>
 
             <TextBox
-                        Grid.Column="3"
+                        Grid.Column="4"
                         Margin="4 0 3 0"
                         VerticalAlignment="Center"
                         Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}"
                         FontSize="14"/>
 
             <TextBox
-                        Grid.Column="4"
+                        Grid.Column="5"
                         Margin="4 0 3 0"
                         VerticalAlignment="Center"
                         Text="{Binding SecondName, UpdateSourceTrigger=PropertyChanged}"

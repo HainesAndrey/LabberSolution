@@ -14,7 +14,7 @@ namespace LabberClient.Workspace.DebtsTab
 
         private void DebtsTabPage_UpdateTable(System.Data.DataTable datatable)
         {
-            table.ItemsSource = datatable.DefaultView;
+            table.ItemsSource = datatable?.DefaultView;
             foreach (var item in table.Columns)
             {
                 item.Header = datatable.Columns[item.Header.ToString()].Caption;

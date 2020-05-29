@@ -21,7 +21,8 @@
             Content="{Binding JournalsSelector}"/>-->
 
         <ListView
-            ItemsSource="{Binding Groups}">
+            ItemsSource="{Binding Groups}"
+            SelectedItem="{Binding CurrentGroup, Mode=OneWayToSource}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Path=Title}"/>
