@@ -26,7 +26,8 @@ namespace LabberClient.Workspace.LabsTab
 
         public string AddSaveBtnTitle { get => addSaveBtnTitle; set { addSaveBtnTitle = value; RaisePropertyChanged("AddSaveBtnTitle"); } }
         public string Number { get => number; set { number = value; RaisePropertyChanged("Number"); } }
-        public DateTime Date { get => date; set { date = value; RaisePropertyChanged("Date"); } }
+        public DateTime Date { get => date;
+            set { date = value; RaisePropertyChanged("Date"); } }
         public bool TableEnabled { get => tableEnabled; set { tableEnabled = value; RaisePropertyChanged("TableEnabled"); } }
 
         public Journal CurrentJournal { get => currentJournal; set { currentJournal = value; RaisePropertyChanged("CurrentJournal"); } }

@@ -160,8 +160,7 @@
                         Grid.Column="1"
                         Margin="4 0 3 0"
                         VerticalAlignment="Center"
-                        
-                        Text="{Binding Date, StringFormat=dd-MM-yyyy, UpdateSourceTrigger=PropertyChanged}"
+                        SelectedDate="{Binding Date, StringFormat=dd-MM-yyyy, UpdateSourceTrigger=PropertyChanged}"
                         FontSize="14"/>
 
                     <Grid
