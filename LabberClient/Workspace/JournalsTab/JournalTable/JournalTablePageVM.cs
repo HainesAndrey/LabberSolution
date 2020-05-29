@@ -28,8 +28,8 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
 
         public Mark CurrentMark { get; set; }
 
-        public delegate void UpdateHeadersEventHandler(DataTable table);
-        public event UpdateHeadersEventHandler UpdateHeaders;
+        public delegate void UpdateTableEventHandler(DataTable table);
+        public event UpdateTableEventHandler UpdateTable;
 
         public JournalTablePageVM(Journal journal, ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
@@ -42,7 +42,7 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
         public async override void LoadData()
         {
             await Refresh();
-            UpdateHeaders?.Invoke(dataTable);
+            UpdateTable?.Invoke(dataTable);
         }
 
         private Task Refresh()
@@ -112,7 +112,7 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
                 }
             }
             await Refresh();
-            UpdateHeaders?.Invoke(dataTable);
+            UpdateTable?.Invoke(dataTable);
         }
 
         private string Journal_LabToString(Journal_Lab journal_lab)

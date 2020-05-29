@@ -5,7 +5,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     mc:Ignorable="d" 
-    Title="DebtsTabPage">
+    Title="DebtsTabPage"
+    Loaded="Page_Loaded">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -13,11 +14,20 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         
-        <Frame
+        <!--<Frame
             Focusable="False"
             NavigationUIVisibility="Hidden"
             IsManipulationEnabled="False"
-            Content="{Binding JournalsSelector}"/>
+            Content="{Binding JournalsSelector}"/>-->
+
+        <ListView
+            ItemsSource="{Binding Groups}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Path=Title}"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
 
         <DataGrid
             Grid.Column="1"
@@ -35,7 +45,8 @@
             RowBackground="GhostWhite"
             AlternatingRowBackground="WhiteSmoke"
             VerticalScrollBarVisibility="Visible"
-            HorizontalScrollBarVisibility="Visible">
+            HorizontalScrollBarVisibility="Visible"
+            IsEnabled="{Binding TableEnabled}">
         </DataGrid>
     </Grid>
 </Page>

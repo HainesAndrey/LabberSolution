@@ -16,7 +16,7 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
         {
             InitializeComponent();
             DataContext = new JournalTablePageVM(journal, responseEvent, pageEnabledEvent, loadingStateEvent, completeStateEvent);
-            (DataContext as JournalTablePageVM).UpdateHeaders += JournalTablePage_UpdateHeaders;
+            (DataContext as JournalTablePageVM).UpdateTable += JournalTablePage_UpdateHeaders;
         }
 
         private void JournalTablePage_UpdateHeaders(DataTable datatable)
