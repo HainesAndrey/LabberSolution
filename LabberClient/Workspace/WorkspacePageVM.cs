@@ -31,12 +31,12 @@ namespace LabberClient.Workspace
         public Brush OpenLabsTabColor { get => openLabsTabColor; set { openLabsTabColor = value; RaisePropertyChanged("OpenLabsTabColor"); } }
         public Brush OpenDebtsTabColor { get => openDebtsTabColor; set { openDebtsTabColor = value; RaisePropertyChanged("OpenDebtsTabColor"); } }
         public Brush OpenAdminTabColor { get => openAdminTabColor; set { openAdminTabColor = value; RaisePropertyChanged("OpenAdminTabColor"); } }
+        public Page CurrentPage { get => currentPage; set { currentPage = value; RaisePropertyChanged("CurrentPage"); } }
 
         public JournalsTabPage JournalsTabPage { get; set; }
         public LabsTabPage LabsTabPage { get; set; }
         public DebtsTabPage DebtsTabPage { get; set; }
         public AdminTabPage AdminTabPage { get; set; }
-        public Page CurrentPage { get => currentPage; set { currentPage = value; RaisePropertyChanged("CurrentPage"); } }
 
         public MvxCommand OpenJournalsTab { get; set; }
         public MvxCommand OpenLabsTab { get; set; }
@@ -74,11 +74,7 @@ namespace LabberClient.Workspace
 
         private void OpenAdminTabBody()
         {
-            CurrentPage = AdminTabPage;
-            OpenAdminTabColor = Brushes.DodgerBlue;
-            OpenDebtsTabColor = Brushes.Black;
-            OpenJournalsTabColor = Brushes.Black;
-            OpenLabsTabColor = Brushes.Black;
+            InvokeCompleteStateEvent("admintab");
         }
 
         private void OpenLabsTabBody()

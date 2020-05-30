@@ -22,7 +22,7 @@
 
                 <ListView
                     SelectionMode="Single"
-                    BorderBrush="LightGray"
+                    BorderBrush="Gray"
                     BorderThickness="1 1 1 0"
                     Background="WhiteSmoke"
                     ItemsSource="{Binding Items}"

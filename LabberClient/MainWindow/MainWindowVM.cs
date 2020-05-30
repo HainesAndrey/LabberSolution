@@ -9,6 +9,7 @@ using LabberClient.Subjects;
 using System.Windows;
 using System;
 using LabberClient.Students;
+using LabberClient.Workspace.AdminTab;
 
 namespace LabberClient
 {
@@ -23,6 +24,8 @@ namespace LabberClient
         private CreateDBPage createDBPage;
         private AddSubjectsPage addSubjectsPage;
         private AddStudentsPage addStudentsPage;
+        private WorkspacePage workspacePage;
+        private AdminTabPage adminTabPage;
 
         public event ResponseHandler ResponseEvent;
         public event PageEnabledHandler PageEnabledEvent;
@@ -111,14 +114,38 @@ namespace LabberClient
                             break;
 
                         case "next":
-                            CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                            if (workspacePage == null)
+                                workspacePage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                            CurrentPage = workspacePage;
                             break;
                     }
                     break;
 
-                //default:
-                //    CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
-                //    break;
+                case nameof(WorkspacePage):
+                    switch ((string)parameter)
+                    {
+                        case "admintab":
+                            if (adminTabPage == null)
+                                adminTabPage = new AdminTabPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                            CurrentPage = adminTabPage;
+                            break;
+                    }
+                    break;
+
+                case nameof(AdminTabPage):
+                    switch ((string)parameter)
+                    {
+                        case "workspace":
+                            if (workspacePage == null)
+                                workspacePage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                            CurrentPage = workspacePage;
+                            break;
+                    }
+                    break;
+
+                    //default:
+                    //    CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                    //    break;
             }   
         }
 
