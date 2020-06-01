@@ -5,35 +5,36 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     mc:Ignorable="d" 
-    Title="JournalTableWrapperPage">
+    Title="JournalTableWrapperPage"
+    Background="WhiteSmoke">
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
             <RowDefinition/>
-            <!--<RowDefinition/>
-            <RowDefinition/>-->
         </Grid.RowDefinitions>
 
-        <!--<TextBlock
+        <TextBlock
             Text="{Binding Title}"
             TextWrapping="Wrap"
             FontSize="14"
-            Foreground="DodgerBlue"
-            TextAlignment="Center"
+            Margin="5 0 0 0"
+            TextAlignment="Left"
             HorizontalAlignment="Left">
             <TextBlock.Effect>
                 <DropShadowEffect
-                    BlurRadius="10"У
+                    BlurRadius="10"
                     ShadowDepth="0"
                     Opacity="0.2"/>
             </TextBlock.Effect>
-        </TextBlock>-->
+        </TextBlock>
 
-        <Frame
-            VerticalAlignment="Top"
-            Content="{Binding JournalTablePage}"/>
-        <!--<journaltable:JournalDataGrid
-            Labs="{Binding Labs}"
-            Marks="{Binding Marks}"/>-->
+        <Grid
+            Background="WhiteSmoke"
+            Grid.Row="1">
+            <Frame
+                VerticalAlignment="Top"
+                Content="{Binding JournalTablePage}"/>
+        </Grid>
     </Grid>
 </Page>

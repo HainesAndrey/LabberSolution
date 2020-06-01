@@ -3,7 +3,7 @@
     public delegate void ResponseHandler(ResponseType responseType, string msg);
     public delegate void PageEnabledHandler(bool state);
     public delegate void LoadingStateHandler(bool state);
-    public delegate void CompleteStateHanlder(object parameter);
+    public delegate void CompleteStateHanlder(string parameter);
 
     public interface ILabberVM
     {

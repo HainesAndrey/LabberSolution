@@ -1,12 +1,10 @@
 ﻿using LabberClient.VMStuff;
 using LabberLib.DataBaseContext.Entities;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 
 namespace LabberClient.Workspace.JournalsTab.JournalTable
 {
@@ -51,17 +49,9 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
                         mark.Date = (DataContext as JournalTablePageVM).Journal_Labs.FirstOrDefault(x => x.Id == mark.Journal_LabId).Date;
                         marks.Add(mark);
                     }
-                        
                 }
             }
             (DataContext as JournalTablePageVM).CurrentMark = marks?.FirstOrDefault();
-        }
-
-        private Journal_Lab StringToJournal_Lab(string value)
-        {
-            var items = value.Split('\n');
-            return new Journal_Lab() { };
-            //return $"{journal_lab.Lab.Number}\n{journal_lab.Date}";
         }
 
         private string Journal_LabToString(Journal_Lab journal_lab)
@@ -83,10 +73,5 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
         {
             (DataContext as JournalTablePageVM).SetTrueMark();
         }
-
-        //private void MarkState_Click(object sender, RoutedEventArgs e)
-        //{
-
-        //}
     }
 }

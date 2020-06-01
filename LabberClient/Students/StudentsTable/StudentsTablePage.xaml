@@ -6,7 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     mc:Ignorable="d"
     Title="StudentsTablePage"
-    x:Name="page" Loaded="page_Loaded">
+    x:Name="page"
+    Loaded="page_Loaded">
     <Grid
         HorizontalAlignment="Center"
         Background="GhostWhite">

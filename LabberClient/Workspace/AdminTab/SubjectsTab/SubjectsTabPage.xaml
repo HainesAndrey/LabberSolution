@@ -10,7 +10,6 @@
     <Grid
         HorizontalAlignment="Center">
         <Frame
-            Margin="20 0 20 5"
             Focusable="False"
             NavigationUIVisibility="Hidden"
             IsManipulationEnabled="False"

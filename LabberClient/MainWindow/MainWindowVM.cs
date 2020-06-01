@@ -1,15 +1,13 @@
-﻿using LabberClient.VMStuff;
-using LabberClient.CreateDB;
-using LabberClient.Workspace;
+﻿using LabberClient.CreateDB;
 using LabberClient.Login;
+using LabberClient.Students;
+using LabberClient.Subjects;
+using LabberClient.VMStuff;
+using LabberClient.Workspace;
+using LabberClient.Workspace.AdminTab;
+using MvvmCross.ViewModels;
 using System.Windows.Controls;
 using System.Windows.Media;
-using MvvmCross.ViewModels;
-using LabberClient.Subjects;
-using System.Windows;
-using System;
-using LabberClient.Students;
-using LabberClient.Workspace.AdminTab;
 
 namespace LabberClient
 {
@@ -17,7 +15,6 @@ namespace LabberClient
     {
         private Page currentPage;
         private string responseMessage = "";
-        private Duration duration = new Duration(new TimeSpan(0, 0, 5));
         private Brush responseBrush;
         private bool pageEnabledState = true;
         private bool loadingState = false;
@@ -33,18 +30,10 @@ namespace LabberClient
         public event CompleteStateHanlder CompleteStateEvent;
 
         public Page CurrentPage { get => currentPage; set { currentPage = value; RaisePropertyChanged("CurrentPage"); } }
-        public Duration Duration { get => duration; set { duration = value; RaisePropertyChanged("Duration"); } }
         public Brush ResponseBrush { get => responseBrush; set { responseBrush = value; RaisePropertyChanged("ResponseBrush"); } }
         public bool PageEnabledState { get => pageEnabledState; set { pageEnabledState = value; RaisePropertyChanged("PageEnabledState"); } }
         public bool LoadingState { get => loadingState; set { loadingState = value; RaisePropertyChanged("LoadingState"); } }
-        public string ResponseMessage { get => responseMessage;
-            set
-            {
-                responseMessage = value;
-                Duration = GetDuration(responseMessage);
-                RaisePropertyChanged("ResponseMessage");
-            }
-        }
+        public string ResponseMessage { get => responseMessage; set { responseMessage = value; RaisePropertyChanged("ResponseMessage"); }}
 
         public MainWindowVM()
         {
@@ -53,20 +42,15 @@ namespace LabberClient
             LoadingStateEvent += MainWindowVM_LoadingStateEvent;
             CompleteStateEvent += MainWindowVM_CompleteStateEvent;
 
-            //createDBPage = new CreateDBPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
-            //addSubjectsPage = new AddSubjectsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
-
             CurrentPage = new LoginPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
-            //CurrentPage = new AddStudentsPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent); ;
-            //CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
         }
 
-        private void MainWindowVM_CompleteStateEvent(object parameter)
+        private void MainWindowVM_CompleteStateEvent(string parameter)
         {
             switch (CurrentPage.GetType().Name)
             {
                 case nameof(LoginPage):
-                    switch ((string)parameter)
+                    switch (parameter)
                     {
                         case "createDB":
                             createDBPage = new CreateDBPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
@@ -75,13 +59,15 @@ namespace LabberClient
                             CurrentPage = createDBPage;
                             break;
                         case "next":
-                            CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                            if (workspacePage == null)
+                                workspacePage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+                            CurrentPage = workspacePage;
                             break;
                     }
                     break;
 
                 case nameof(CreateDBPage):
-                    switch ((string)parameter)
+                    switch (parameter)
                     {
                         case "cancel":
                             CurrentPage = new LoginPage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
@@ -94,7 +80,7 @@ namespace LabberClient
                     break;
 
                 case nameof(AddSubjectsPage):
-                    switch ((string)parameter)
+                    switch (parameter)
                     {
                         case "cancel":
                             CurrentPage = createDBPage;
@@ -107,7 +93,7 @@ namespace LabberClient
                     break;
 
                 case nameof(AddStudentsPage):
-                    switch ((string)parameter)
+                    switch (parameter)
                     {
                         case "cancel":
                             CurrentPage = addSubjectsPage;
@@ -122,7 +108,7 @@ namespace LabberClient
                     break;
 
                 case nameof(WorkspacePage):
-                    switch ((string)parameter)
+                    switch (parameter)
                     {
                         case "admintab":
                             if (adminTabPage == null)
@@ -133,7 +119,7 @@ namespace LabberClient
                     break;
 
                 case nameof(AdminTabPage):
-                    switch ((string)parameter)
+                    switch (parameter)
                     {
                         case "workspace":
                             if (workspacePage == null)
@@ -142,16 +128,7 @@ namespace LabberClient
                             break;
                     }
                     break;
-
-                    //default:
-                    //    CurrentPage = new WorkspacePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
-                    //    break;
             }   
-        }
-
-        private Duration GetDuration(string value)
-        {
-            return new Duration(TimeSpan.FromSeconds(value.Length / 15));
         }
 
         private void MainWindowVM_LoadingStateEvent(bool state)

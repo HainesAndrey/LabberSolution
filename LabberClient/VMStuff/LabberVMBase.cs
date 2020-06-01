@@ -37,7 +37,7 @@ namespace LabberClient.VMStuff
             LoadingStateEvent?.Invoke(state);
         }
 
-        public void InvokeCompleteStateEvent(object parameter)
+        public void InvokeCompleteStateEvent(string parameter)
         {
             CompleteStateEvent?.Invoke(parameter);
         }

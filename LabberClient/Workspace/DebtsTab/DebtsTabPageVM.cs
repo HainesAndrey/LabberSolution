@@ -20,7 +20,6 @@ namespace LabberClient.Workspace.DebtsTab
         private DataTable dataTable;
         private Group currentGroup;
 
-        //public JournalsSelectorPage JournalsSelector { get; set; }
         public List<Group> Groups { get => groups; set { groups = value; RaisePropertyChanged("Groups"); } }
         public List<Student> Students { get; set; }
         public List<Subject> Subjects { get; set; }
@@ -42,7 +41,7 @@ namespace LabberClient.Workspace.DebtsTab
         public DebtsTabPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            //JournalsSelector = new JournalsSelectorPage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
+
         }
 
         public override async void LoadData()

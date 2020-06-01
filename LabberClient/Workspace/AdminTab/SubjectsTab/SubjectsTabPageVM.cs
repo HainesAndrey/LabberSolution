@@ -10,7 +10,7 @@ namespace LabberClient.Workspace.AdminTab.SubjectsTab
         public SubjectsTabPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            SubjectsTablePage = new SubjectsTablePage(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
+            SubjectsTablePage = new SubjectsTablePage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
         }
     }
 }

@@ -51,7 +51,7 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
             {
                 using (db = new DBWorker())
                 {
-                    Journal_Labs = new ObservableCollection<Journal_Lab>(db.Journals_Labs.Include(x => x.Journal).Include(x => x.Lab).Where(x => x.JournalId == Journal.Id));
+                    Journal_Labs = new ObservableCollection<Journal_Lab>(db.Journals_Labs.Include(x => x.Journal).Include(x => x.Lab).Where(x => x.JournalId == Journal.Id).ToList().OrderBy(x => x.Date));
                     Marks = new ObservableCollection<Mark>(db.Marks.Include(x => x.Journal_Lab).Where(x => x.Journal_Lab.JournalId == Journal.Id));
                     Students = new ObservableCollection<Student>(db.Students.Where(x => x.GroupId == Journal.GroupId && x.SubGroup == Journal.SubGroup)
                         .OrderBy(x => x.Surname).ThenBy(x => x.FirstName).ThenBy(x => x.SecondName));
@@ -95,6 +95,8 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
 
         public async void SetTrueMark()
         {
+            if (CurrentMark == null)
+                return;
             using (db = new DBWorker())
             {
                 if (CurrentMark.Id == 0)

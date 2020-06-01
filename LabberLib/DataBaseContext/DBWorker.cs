@@ -15,21 +15,6 @@ namespace LabberLib.DataBaseContext
         public static string CredPsw { get; } = "28032001";
         public static string FilePath { get; set; } = "";
         public static uint UserId { get; set; }
-        //public bool IsFilled
-        //{
-        //    get
-        //    {
-        //        try
-        //        {
-        //            Roles.Count();
-        //        }
-        //        catch (Exception)
-        //        {
-        //            return false;
-        //        }
-        //        return true;
-        //    }
-        //}
 
         public DbSet<Lab> Labs { get; set; }
         public DbSet<Mark> Marks { get; set; }
@@ -39,7 +24,6 @@ namespace LabberLib.DataBaseContext
         public DbSet<Journal> Journals { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<Subject> Subjects { get; set; }
-        //public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Journal_Lab> Journals_Labs { get; set; }
 
         public DBWorker(bool createIfNotExists = false) : base()
@@ -62,10 +46,7 @@ namespace LabberLib.DataBaseContext
                 Add(new Role("teacher"));
                 SaveChanges();
                 Add(new User(Roles.FirstOrDefault().Id, "adminPOIT", "Admin", "POIT", null, "28032001"));
-                //Add(new User(Roles.FirstOrDefault(x => x.Title == "teacher").Id, "mvmenshikova"));
                 SaveChanges();
-                //Add(new Teacher(Users.FirstOrDefault(x => x.Name == "mvmenshikova").Id, "Меньшикова", "Марина", "Валерьевна"));
-                //SaveChanges();
             }
         }
 
@@ -86,6 +67,7 @@ namespace LabberLib.DataBaseContext
         {
             Disconnect();
             Database.EnsureDeleted();
+            FilePath = "";
         }
 
         public override void Dispose()
@@ -107,11 +89,6 @@ namespace LabberLib.DataBaseContext
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var conn = new SqliteConnection($"Filename={FilePath}");
-            //conn.Open();
-            //var command = conn.CreateCommand();
-            //command.CommandText = $"PRAGMA password = '{dbpsw}';";
-            //command.ExecuteNonQuery();
-
             optionsBuilder.UseSqlite(conn);
         }
 
@@ -125,7 +102,6 @@ namespace LabberLib.DataBaseContext
             JournalsModel(modelBuilder);
             StudentsModel(modelBuilder);
             SubjectsModel(modelBuilder);
-            //TeachersModel(modelBuilder);
             Journals_LabsModel(modelBuilder);
         }
 
@@ -218,19 +194,6 @@ namespace LabberLib.DataBaseContext
                 su.HasIndex(x => new { x.ShortTitle, x.LongTitle }).IsUnique();
             });
         }
-        //private static void TeachersModel(ModelBuilder modelBuilder)
-        //{
-        //    modelBuilder.Entity<Teacher>(t =>
-        //    {
-        //        t.ToTable("teachers");
-        //        t.HasKey(x => x.UserId);
-        //        t.Property(x => x.Surname).HasColumnType("varchar(15)").IsRequired();
-        //        t.Property(x => x.FirstName).HasColumnType("varchar(15)").IsRequired();
-        //        t.Property(x => x.SecondName).HasColumnType("varchar(15)").IsRequired();
-        //        t.HasIndex(x => new { x.Surname, x.FirstName, x.SecondName }).IsUnique();
-        //        t.HasOne(x => x.User).WithOne().HasForeignKey<Teacher>(x => x.UserId).IsRequired();
-        //    });
-        //}
         private static void Journals_LabsModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Journal_Lab>(jl =>

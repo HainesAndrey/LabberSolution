@@ -10,15 +10,17 @@ namespace LabberClient.VMStuff
 {
     public class FaderFrame : Frame
     {
+
+        private bool _allowDirectNavigation = false;
+        private ContentPresenter _contentPresenter = null;
+        private NavigatingCancelEventArgs _navArgs = null;
+
         #region FadeDuration
 
         public static readonly DependencyProperty FadeDurationProperty =
             DependencyProperty.Register("FadeDuration", typeof(Duration), typeof(FaderFrame),
                 new FrameworkPropertyMetadata(new Duration(TimeSpan.FromMilliseconds(300))));
 
-        /// <summary>
-        /// FadeDuration will be used as the duration for Fade Out and Fade In animations
-        /// </summary>
         public Duration FadeDuration
         {
             get { return (Duration)GetValue(FadeDurationProperty); }
@@ -27,28 +29,19 @@ namespace LabberClient.VMStuff
 
         #endregion
 
-        public FaderFrame()
-            : base()
+        public FaderFrame() : base()
         {
-            // watch for navigations
             Navigating += OnNavigating;
         }
 
         public override void OnApplyTemplate()
         {
-            // get a reference to the frame's content presenter
-            // this is the element we will fade in and out
             _contentPresenter = GetTemplateChild("PART_FrameCP") as ContentPresenter;
             base.OnApplyTemplate();
         }
 
         protected void OnNavigating(object sender, NavigatingCancelEventArgs e)
         {
-            // if we did not internally initiate the navigation:
-            //   1. cancel the navigation,
-            //   2. cache the target,
-            //   3. disable hittesting during the fade, and
-            //   4. fade out the current content
             if (Content != null && !_allowDirectNavigation && _contentPresenter != null)
             {
                 e.Cancel = true;
@@ -65,10 +58,6 @@ namespace LabberClient.VMStuff
 
         private void FadeOutCompleted(object sender, EventArgs e)
         {
-            // after the fade out
-            //   1. re-enable hittesting
-            //   2. initiate the delayed navigation
-            //   3. invoke the FadeIn animation at Loaded priority
             (sender as AnimationClock).Completed -= FadeOutCompleted;
             if (_contentPresenter != null)
             {
@@ -107,9 +96,5 @@ namespace LabberClient.VMStuff
                     });
             }
         }
-
-        private bool _allowDirectNavigation = false;
-        private ContentPresenter _contentPresenter = null;
-        private NavigatingCancelEventArgs _navArgs = null;
     }
 }
