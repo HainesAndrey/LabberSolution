@@ -26,6 +26,7 @@ namespace LabberClient.Subjects.SubjectsTable
         private Subject currentItem;
         private string shortTitle = "";
         private string longTitle = "";
+        private List<Subject> items = new List<Subject>();
 
         public string AddSaveBtnTitle { get => addSaveBtnTitle; set { addSaveBtnTitle = value; RaisePropertyChanged("AddSaveBtnTitle"); } }
         public bool AddEnabled { get => addEnabled; set { addEnabled = value; RaisePropertyChanged("AddEnabled"); } }
@@ -34,7 +35,9 @@ namespace LabberClient.Subjects.SubjectsTable
         public bool ClearEnabled { get => clearEnabled; set { clearEnabled = value; RaisePropertyChanged("ClearEnabled"); } }
         public Subject CurrentItem { get => currentItem; set { currentItem = value; RaisePropertyChanged("CurrentItem"); } }
 
-        public string ShortTitle { get => shortTitle;
+        public string ShortTitle
+        {
+            get => shortTitle;
             set
             {
                 shortTitle = value;
@@ -43,7 +46,9 @@ namespace LabberClient.Subjects.SubjectsTable
                 RaisePropertyChanged("ShortTitle");
             }
         }
-        public string LongTitle { get => longTitle;
+        public string LongTitle
+        {
+            get => longTitle;
             set
             {
                 longTitle = value;
@@ -56,7 +61,7 @@ namespace LabberClient.Subjects.SubjectsTable
         bool CheckRequiredFields() => ShortTitle != "" && LongTitle != "";
         bool IsAllFieldAreEmpty() => ShortTitle == "" && LongTitle == "";
 
-        public ObservableCollection<Subject> Items { get; set; } = new ObservableCollection<Subject>();
+        public List<Subject> Items { get => items; set { items = value; RaisePropertyChanged("Items"); } }
         public MvxCommand Add { get; set; }
         public MvxCommand Change { get; set; }
         public MvxCommand Delete { get; set; }
@@ -67,9 +72,6 @@ namespace LabberClient.Subjects.SubjectsTable
         public SubjectsTablePageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            var view = (CollectionView)CollectionViewSource.GetDefaultView(Items);
-            view.SortDescriptions.Add(new SortDescription("ShortTitle", ListSortDirection.Ascending));
-
             Add = new MvxCommand(AddBody);
             Change = new MvxCommand(ChangeBody);
             Delete = new MvxCommand(DeleteBody);
@@ -85,17 +87,17 @@ namespace LabberClient.Subjects.SubjectsTable
 
         private async void Refresh()
         {
-            Items.Clear();
             InvokeLoadingStateEvent(true);
-            List<Subject> subjects = null;
             await Task.Run(() =>
             {
                 using (db = new DBWorker())
                 {
-                    subjects = db.Subjects.ToList();
+                    Items = db.Subjects.ToList();
                 }
             });
-            subjects?.ForEach(x => Items.Add(x));
+            DeleteAllEnabled = Items.Count > 0;
+            var view = (CollectionView)CollectionViewSource.GetDefaultView(Items);
+            view.SortDescriptions.Add(new SortDescription("ShortTitle", ListSortDirection.Ascending));
             InvokeLoadingStateEvent(false);
         }
 
@@ -105,6 +107,7 @@ namespace LabberClient.Subjects.SubjectsTable
             {
                 db.Subjects.RemoveRange(Items);
             }
+            InvokeResponseEvent(ResponseType.Good, "Дисциплины успешно удалены");
             Refresh();
         }
 
@@ -120,6 +123,7 @@ namespace LabberClient.Subjects.SubjectsTable
             {
                 db.Subjects.Remove(db.Subjects.First(x => x.ShortTitle == CurrentItem.ShortTitle));
             }
+            InvokeResponseEvent(ResponseType.Good, "Дисциплина успешно удалена");
             Refresh();
         }
 
@@ -136,7 +140,9 @@ namespace LabberClient.Subjects.SubjectsTable
         {
             if (AddSaveBtnTitle == "Добавить")
             {
-                if (Items.ToList().Exists(x => x.ShortTitle == ShortTitle))
+                if (ShortTitle.Replace(" ", "") == "" || LongTitle.Replace(" ", "") == "")
+                    InvokeResponseEvent(ResponseType.Bad, "Информация о дисциплине некорректна");
+                else if (Items.ToList().Exists(x => x.ShortTitle == ShortTitle))
                     InvokeResponseEvent(ResponseType.Bad, "Дисциплина с такой аббревиатурой уже добавлена");
                 else
                 {
@@ -148,12 +154,18 @@ namespace LabberClient.Subjects.SubjectsTable
                             db.Subjects.Add(new Subject(ShortTitle, LongTitle));
                         }
                     });
+                    InvokeResponseEvent(ResponseType.Good, "Дисциплина успешно добавлена");
                     Refresh();
                     InvokeLoadingStateEvent(false);
                 }
             }
             else
             {
+                if (ShortTitle.Replace(" ", "") == "" || LongTitle.Replace(" ", "") == "")
+                {
+                    InvokeResponseEvent(ResponseType.Bad, "Информация о дисциплине некорректна");
+                    return;
+                }
                 InvokeLoadingStateEvent(true);
                 await Task.Run(() =>
                 {
@@ -233,12 +245,15 @@ namespace LabberClient.Subjects.SubjectsTable
                         {
                             var newsubj = new Subject(arr[i, 0].ToString(), arr[i, 1].ToString());
                             if (!subjects.ToList().Exists(x => x.ShortTitle == newsubj.ShortTitle))
+                            {
                                 subjects.Add(newsubj);
+                                using (db = new DBWorker())
+                                {
+                                    db.Subjects.Add(newsubj);
+                                }
+                            }
                         }
-                        using (db = new DBWorker())
-                        {
-                            db.Subjects.AddRange(subjects);
-                        }
+
                     });
                     Refresh();
                     DeleteAllEnabled = true;

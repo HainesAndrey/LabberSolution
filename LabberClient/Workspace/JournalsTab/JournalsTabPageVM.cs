@@ -1,18 +1,21 @@
 ﻿using LabberClient.VMStuff;
 using LabberClient.Workspace.JournalsTab.JournalsSelector;
 using LabberClient.Workspace.JournalsTab.JournalTableWrapper;
+using LabberLib.DataBaseContext;
 using LabberLib.DataBaseContext.Entities;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace LabberClient.Workspace.JournalsTab
 {
     public class JournalsTabPageVM : LabberVMBase
     {
-        public JournalsSelectorPage JournalsSelector { get; set; }
-
         public ObservableCollection<TabItem> Tabs { get; set; } = new ObservableCollection<TabItem>();
+
+        public JournalsSelectorPage JournalsSelector { get; set; }
         public List<Journal> Journals { get; set; } = new List<Journal>();
 
         public JournalsTabPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
@@ -38,24 +41,30 @@ namespace LabberClient.Workspace.JournalsTab
             }
         }
 
-        //public override void LoadData()
-        //{
-        //    InvokeLoadingStateEvent(true);
-        //    Refresh();
-        //    InvokeLoadingStateEvent(false);
-        //}
+        public override void LoadData()
+        {
+            InvokeLoadingStateEvent(true);
+            Refresh();
+            InvokeLoadingStateEvent(false);
+        }
 
-        //private async void Refresh()
-        //{
-        //    //bool isAdmin = false;
-        //    //await Task.Run(() =>
-        //    //{
-        //    //    using (db = new DBWorker())
-        //    //    {
-        //    //        isAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;
-        //    //    }
-        //    //});
-        //}
+        private async void Refresh()
+        {
+            List<uint> journalsids = new List<uint>();
+            await Task.Run(() =>
+            {
+                using (db = new DBWorker())
+                {
+                    journalsids = Journals.Select(x => x.Id).ToList().Except(db.Journals.Select(x => x.Id)).ToList();
+                }
+                Journals.RemoveAll(x => journalsids.Contains(x.Id));
+            });
+            foreach (var id in journalsids)
+            {
+                Tabs.RemoveAt(Tabs.ToList().FindIndex(x => ((x.Content as Frame).Content as JournalTableWrapperPage).Journal.Id == id));
+            }
+
+        }
 
         private string GetJournalHeader(Journal journal)
         {

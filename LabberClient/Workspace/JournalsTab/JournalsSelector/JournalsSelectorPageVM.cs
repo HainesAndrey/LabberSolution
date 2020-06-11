@@ -19,21 +19,27 @@ namespace LabberClient.Workspace.JournalsTab.JournalsSelector
         private ObservableCollection<Node> nodes;
         private bool needToExpandAll;
         private bool isAdmin;
+        private bool byGroups = true;
+        private bool buSubjects;
+        private bool byTeachers;
 
         public bool TreeEnabled { get => treeEnabled; set { treeEnabled = value; RaisePropertyChanged("TreeEnabled"); } }
         public bool LoadingState { get => loadingState; set { loadingState = value; RaisePropertyChanged("LoadingState"); } }
         public Visibility FilterEnabled { get => filterEnabled; set { filterEnabled = value; RaisePropertyChanged("FilterEnabled"); } }
         public bool NeedToExpandAll { get => needToExpandAll; set { needToExpandAll = value; RaisePropertyChanged("NeedToExpandAll"); } }
-        public bool IsAdmin { get => isAdmin;
-            set { isAdmin = value; FilterEnabled = isAdmin ? Visibility.Collapsed : Visibility.Visible; } }
+        public bool IsAdmin { get => isAdmin; set { isAdmin = value; FilterEnabled = isAdmin ? Visibility.Collapsed : Visibility.Visible; } }
         public bool NeedToDisplayAllJournals { get; set; } = true;
 
-        public MvxCommand GroupByGroups { get; set; }
-        public MvxCommand GroupBySubjects { get; set; }
-        public MvxCommand GroupByTeachers { get; set; }
-        public MvxCommand FilterByOwn { get; set; }
-        public MvxCommand FilterByAll { get; set; }
-        public MvxCommand<bool> ExpandAll { get; set; }
+        public bool ByGroups { get => byGroups; set { byGroups = value; RaisePropertyChanged("ByGroups"); } }
+        public bool BySubjects { get => buSubjects; set { buSubjects = value; RaisePropertyChanged("BySubjects"); } }
+        public bool ByTeachers { get => byTeachers; set { byTeachers = value; RaisePropertyChanged("ByTeachers"); } }
+
+        public MvxCommand GroupByGroups { get; }
+        public MvxCommand GroupBySubjects { get; }
+        public MvxCommand GroupByTeachers { get; }
+        public MvxCommand FilterByOwn { get; }
+        public MvxCommand FilterByAll { get; }
+        public MvxCommand<bool> ExpandAll { get; }
 
         public ObservableCollection<Node> Nodes { get => nodes; set { nodes = value; RaisePropertyChanged("Nodes"); } }
         public List<Journal> Journals { get; set; } = new List<Journal>();
@@ -49,7 +55,7 @@ namespace LabberClient.Workspace.JournalsTab.JournalsSelector
             {
                 IsAdmin = db.Users.FirstOrDefault(x => x.Id == DBWorker.UserId).RoleId == 1;
                 //if (byOwn)
-                    Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).Where(x => x.UserId == DBWorker.UserId).ToList();
+                Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).Where(x => x.UserId == DBWorker.UserId).ToList();
                 //else
                 //    Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList();
             }
@@ -88,9 +94,12 @@ namespace LabberClient.Workspace.JournalsTab.JournalsSelector
                         Journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList();
                 }
             });
-            GroupByGroups.Execute();
-            //if (isAdmin)
-            //    FilterByOwn.Execute();
+            if (ByGroups)
+                GroupByGroups.Execute();
+            else if (BySubjects)
+                GroupBySubjects.Execute();
+            else if (ByTeachers)
+                GroupByTeachers.Execute();
         }
 
         public void SelectJournal(uint journalId)

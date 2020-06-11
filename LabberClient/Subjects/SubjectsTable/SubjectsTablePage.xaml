@@ -7,7 +7,8 @@
     mc:Ignorable="d"
     Title="SubjectsTablePage"
     Loaded="Page_Loaded"
-    Background="WhiteSmoke">
+    Background="WhiteSmoke"
+    x:Name="page">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -34,7 +35,7 @@
                         Command="{Binding Change}"/>
                     <MenuItem
                         Header="Удалить"
-                        IsEnabled="{Binding DeleteSubjectEnabled}"
+                        IsEnabled="{Binding DeleteEnabled}"
                         Command="{Binding Delete}"/>
                     <MenuItem
                         Header="Удалить всё"
@@ -128,12 +129,14 @@
                 BorderThickness="1 0 0 0"/>
 
             <TextBox
+                MaxLength="15"
                 Margin="4 0 3 0"
                 VerticalAlignment="Center"
                 Text="{Binding ShortTitle, UpdateSourceTrigger=PropertyChanged}"          
                 FontSize="14"/>
 
             <TextBox
+                MaxLength="50"
                 Grid.Column="1"
                 Margin="4 0 3 0"
                 VerticalAlignment="Center"

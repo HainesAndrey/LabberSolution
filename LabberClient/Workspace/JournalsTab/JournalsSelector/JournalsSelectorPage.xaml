@@ -20,17 +20,19 @@
                     <RadioButton
                         Content="Группам"
                         Margin="2 3"
-                        IsChecked="True"
+                        IsChecked="{Binding ByGroups}"
                         Command="{Binding GroupByGroups}"/>
 
                     <RadioButton
-                        Content="Предметам"
+                        Content="Дисциплинам"
                         Margin="2 3"
+                        IsChecked="{Binding BySubjects}"
                         Command="{Binding GroupBySubjects}"/>
 
                     <RadioButton
                         Content="Преподавателям"
                         Margin="2 3"
+                        IsChecked="{Binding ByTeachers}"
                         Command="{Binding GroupByTeachers}"/>
                 </WrapPanel>
             </GroupBox>

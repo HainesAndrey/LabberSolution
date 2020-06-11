@@ -12,7 +12,7 @@ namespace LabberClient.Login
         //private string filePath;
         private string fileName = "\"Не выбран\"";
         //private string name = Environment.UserName;
-        private string login = "adminPOIT";
+        private string login;
 
         //public string FilePath { get => filePath; set { filePath = value; OnPropertyChanged("FilePath"); } }
         public string FileName { get => fileName; set { fileName = value; RaisePropertyChanged("FileName"); } }

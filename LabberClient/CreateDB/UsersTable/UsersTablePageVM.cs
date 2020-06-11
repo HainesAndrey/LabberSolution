@@ -29,6 +29,8 @@ namespace LabberClient.CreateDB.UsersTable
         private string firstName = "";
         private string secondName = "";
         private UserDTO currentUser;
+        private bool canChangeIsAdmin = true;
+        private List<UserDTO> users = new List<UserDTO>();
 
         public string AddSaveUserBtnTitle { get => addSaveUserBtnTitle; set { addSaveUserBtnTitle = value; RaisePropertyChanged("AddSaveUserBtnTitle"); } }
         public bool AddUserEnabled { get => addUserEnabled; set { addUserEnabled = value; RaisePropertyChanged("AddUserEnabled"); } }
@@ -37,6 +39,7 @@ namespace LabberClient.CreateDB.UsersTable
         public bool ClearEnabled { get => clearEnabled; set { clearEnabled = value; RaisePropertyChanged("ClearEnabled"); } }
         public UserDTO CurrentUser { get => currentUser; set { currentUser = value; RaisePropertyChanged("CurrentUser"); } }
         public bool IsAdmin { get => isAdmin; set { isAdmin = value; ClearEnabled = !IsAllFieldAreEmpty(); RaisePropertyChanged("IsAdmin"); } }
+        public bool CanChangeIsAdmin { get => canChangeIsAdmin; set { canChangeIsAdmin = value; RaisePropertyChanged("CanChangeIsAdmin"); } }
         public string SecondName { get => secondName; set { secondName = value; ClearEnabled = !IsAllFieldAreEmpty(); RaisePropertyChanged("SecondName"); } }
         public string Login
         {
@@ -75,8 +78,7 @@ namespace LabberClient.CreateDB.UsersTable
         bool CheckRequiredFields() => Login != "" && Surname != "" && FirstName != "";
         bool IsAllFieldAreEmpty() => Login == "" && Surname == "" && FirstName == "" && SecondName == "" && !IsAdmin;
 
-        public ObservableCollection<UserDTO> Users { get; set; } = new ObservableCollection<UserDTO>();
-
+        public List<UserDTO> Users { get => users; set { users = value; RaisePropertyChanged("Users"); } }
         public MvxCommand AddUser { get; set; }
         public MvxCommand ChangeUser { get; set; }
         public MvxCommand DeleteUser { get; set; }
@@ -86,11 +88,7 @@ namespace LabberClient.CreateDB.UsersTable
 
         public UsersTablePageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
-        {   
-            var view = (CollectionView)CollectionViewSource.GetDefaultView(Users);
-            view.SortDescriptions.Add(new SortDescription("IsAdmin", ListSortDirection.Descending));
-            view.SortDescriptions.Add(new SortDescription("User.Surname", ListSortDirection.Ascending));
-
+        {
             AddUser = new MvxCommand(AddUserBody);
             ChangeUser = new MvxCommand(ChangeUserBody);
             AddFromExcel = new MvxCommand(AddFromExcelBody);
@@ -113,19 +111,21 @@ namespace LabberClient.CreateDB.UsersTable
         private async void Refresh()
         {
             InvokeLoadingStateEvent(true);
-            Users.Clear();
-            List<User> users = null;
             if (DBWorker.FilePath != "")
                 await Task.Run(() =>
                 {
                     using (db = new DBWorker())
                     {
-                        users = db.Users.ToList();
+                        Users = db.Users.ToList().Select(x => new UserDTO(x)).ToList();
                     }
                 });
-            users?.ForEach(x => Users.Add(new UserDTO(x)));
-            if (users.Count != 0)
+            if (Users.Count > 1)
                 DeleteAllEnabled = true;
+            var view = (CollectionView)CollectionViewSource.GetDefaultView(Users);
+            view.SortDescriptions.Add(new SortDescription("IsAdmin", ListSortDirection.Descending));
+            view.SortDescriptions.Add(new SortDescription("User.Surname", ListSortDirection.Ascending));
+            view.SortDescriptions.Add(new SortDescription("User.FirstName", ListSortDirection.Ascending));
+            view.SortDescriptions.Add(new SortDescription("User.SecondName", ListSortDirection.Ascending));
             InvokeLoadingStateEvent(false);
         }
 
@@ -144,13 +144,14 @@ namespace LabberClient.CreateDB.UsersTable
             {
                 db.Users.RemoveRange(Users.Where(x => x.User.Id != 1).Select(x => x.User));
             }
+            InvokeResponseEvent(ResponseType.Good, "Пользователи успешно удалены");
             Refresh();
             DeleteAllEnabled = false;
         }
 
         private void DeleteUserBody()
         {
-            if (CurrentUser.User.Id == 1)
+            if (CurrentUser.User.Id == 1 || CurrentUser.User.Id == DBWorker.UserId)
                 InvokeResponseEvent(ResponseType.Bad, "Данного пользователя удалить невозможно");
             else
             {
@@ -158,6 +159,7 @@ namespace LabberClient.CreateDB.UsersTable
                 {
                     db.Users.Remove(Users.First(x => x.User.Login == CurrentUser.User.Login).User);
                 }
+                InvokeResponseEvent(ResponseType.Good, "Пользователь успешно удален");
                 Refresh();
             }
         }
@@ -177,6 +179,8 @@ namespace LabberClient.CreateDB.UsersTable
             FirstName = CurrentUser.User.FirstName;
             SecondName = CurrentUser.User.SecondName;
             AddSaveUserBtnTitle = "Сохранить";
+            CanChangeIsAdmin = DBWorker.UserId != CurrentUser.User.Id;
+
         }
 
         private async void AddFromExcelBody()
@@ -243,9 +247,10 @@ namespace LabberClient.CreateDB.UsersTable
                             {
                                 var newuser = new UserDTO()
                                 {
-                                    IsAdmin = arr[i, 1] is null ? false : arr[i, 1].ToString() == "+",
+                                    IsAdmin = arr[i, 1] is null ? false : arr[i, 1].ToString() == "админ",
                                     User = new User()
                                     {
+                                        RoleId = (uint)((arr[i, 1] is null ? false : arr[i, 1].ToString() == "админ") ? 1 : 2),
                                         Login = arr[i, 0]?.ToString(),
                                         Surname = arr[i, 2]?.ToString(),
                                         FirstName = arr[i, 3]?.ToString(),
@@ -253,13 +258,16 @@ namespace LabberClient.CreateDB.UsersTable
                                     }
                                 };
                                 if (!users.ToList().Exists(x => x.Login == newuser.User.Login))
+                                {
                                     users.Add(newuser.User);
+                                    using (db = new DBWorker(true))
+                                    {
+                                        db.Users.Add(newuser.User);
+                                    }
+                                }
                             }
 
-                            using (db = new DBWorker(true))
-                            {
-                                db.Users.AddRange(users);
-                            }
+
                         });
                         Refresh();
                     }
@@ -283,7 +291,9 @@ namespace LabberClient.CreateDB.UsersTable
         {
             if (AddSaveUserBtnTitle == "Добавить")
             {
-                if (Users.ToList().Exists(x => x.User.Login == Login))
+                if (Login.Replace(" ", "") == "" || Surname.Replace(" ", "") == "" || FirstName.Replace(" ", "") == "")
+                    InvokeResponseEvent(ResponseType.Bad, "Информация о пользователе некорректна");
+                else if (Users.ToList().Exists(x => x.User.Login == Login))
                     InvokeResponseEvent(ResponseType.Bad, "Пользователь с таким логином уже добавлен");
                 else if (Users.Select(x => x.User).ToList().Exists(x => x.Surname == Surname && x.FirstName == FirstName && x.SecondName == SecondName))
                     InvokeResponseEvent(ResponseType.Bad, "Пользователь с такими ФИО уже добавлен");
@@ -308,7 +318,7 @@ namespace LabberClient.CreateDB.UsersTable
                         InvokeLoadingStateEvent(false);
                         return;
                     }
-                    
+
                     DeleteAllEnabled = true;
                     InvokeResponseEvent(ResponseType.Good, "Пользователь успешно добавлен");
                     InvokeLoadingStateEvent(false);
@@ -316,7 +326,9 @@ namespace LabberClient.CreateDB.UsersTable
             }
             else
             {
-                if (CurrentUser.User.Login != Login && Users.ToList().Exists(x => x.User.Login == Login))
+                if (Login.Replace(" ", "") == "" || Surname.Replace(" ", "") == "" || FirstName.Replace(" ", "") == "")
+                    InvokeResponseEvent(ResponseType.Bad, "Информация о пользователе некорректна");
+                else if (CurrentUser.User.Login != Login && Users.ToList().Exists(x => x.User.Login == Login))
                     InvokeResponseEvent(ResponseType.Bad, "Пользователь с таким логином уже добавлен");
                 else
                 {

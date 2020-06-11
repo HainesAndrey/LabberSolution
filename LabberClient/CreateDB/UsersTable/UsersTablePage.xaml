@@ -184,12 +184,14 @@
                 BorderThickness="1 0 0 0"/>
 
             <TextBox
+                MaxLength="15"
                 Margin="4 0 3 0"
                 VerticalAlignment="Center"
                 Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}"    
                 FontSize="14"/>
 
             <CheckBox
+                IsEnabled="{Binding CanChangeIsAdmin}"
                 Grid.Column="2"
                 Margin="0"
                 HorizontalAlignment="Center"
@@ -197,6 +199,7 @@
                 IsChecked="{Binding IsAdmin, UpdateSourceTrigger=PropertyChanged}"/>
 
             <TextBox
+                MaxLength="15"
                 Grid.Column="3"
                 Margin="4 0 3 0"
                 VerticalAlignment="Center"
@@ -204,6 +207,7 @@
                 FontSize="14"/>
 
             <TextBox
+                MaxLength="15"
                 Grid.Column="4"
                 Margin="4 0 3 0"
                 VerticalAlignment="Center"
@@ -211,6 +215,7 @@
                 FontSize="14"/>
 
             <TextBox
+                MaxLength="15"
                 Grid.Column="5"
                 Margin="4 0 3 0"
                 VerticalAlignment="Center"

@@ -96,9 +96,16 @@ namespace LabberClient.CreateDB
         private void CancelBody()
         {
             if (DBWorker.FilePath != "")
-                using (db = new DBWorker())
+                try
                 {
-                    db.DisconnectAndDelete();
+                    using (db = new DBWorker())
+                    {
+                        db.DisconnectAndDelete();
+                    }
+                }
+                catch (FileNotFoundException)
+                {
+                    DBWorker.FilePath = "";
                 }
             InvokeCompleteStateEvent("cancel");
         }

@@ -10,5 +10,10 @@ namespace LabberClient.Workspace.JournalsTab
             InitializeComponent();
             DataContext = new JournalsTabPageVM(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent);
         }
+
+        private void Page_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            (DataContext as LabberVMBase).LoadData();
+        }
     }
 }
