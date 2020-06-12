@@ -19,37 +19,53 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
         private string subject;
         private string teacher;
         private bool addEnabled = false;
+        private List<string> groups = new List<string>();
+        private List<string> subGroups = new List<string>() { "1", "2" };
+        private List<string> subjects = new List<string>();
+        private List<string> teachers = new List<string>();
+        private List<JournalDTO> items = new List<JournalDTO>();
+        private bool deleteAllEnabled;
 
-        public ObservableCollection<string> Groups { get; set; } = new ObservableCollection<string>();
-        public ObservableCollection<string> SubGroups { get; set; } = new ObservableCollection<string>() { "1", "2" };
-        public ObservableCollection<string> Subjects { get; set; } = new ObservableCollection<string>();
-        public ObservableCollection<string> Teachers { get; set; } = new ObservableCollection<string>();
+        public bool DeleteAllEnabled { get => deleteAllEnabled; set { deleteAllEnabled = value; RaisePropertyChanged("DeleteAllEnabled"); } }
 
-        public ObservableCollection<JournalDTO> Items { get; set; } = new ObservableCollection<JournalDTO>();
+        public List<string> Groups { get => groups; set { groups = value; RaisePropertyChanged("Groups"); } }
+        public List<string> SubGroups { get => subGroups; set { subGroups = value; RaisePropertyChanged("SubGroups"); } }
+        public List<string> Subjects { get => subjects; set { subjects = value; RaisePropertyChanged("Subjects"); } }
+        public List<string> Teachers { get => teachers; set { teachers = value; RaisePropertyChanged("Teachers"); } }
+        public List<JournalDTO> Items { get => items; set { items = value; RaisePropertyChanged("Items"); } }
+
         public JournalDTO CurrentItem { get; set; }
 
-        public string Group { get => group;
+        public string Group
+        {
+            get => group;
             set
             {
                 group = value;
                 AddEnabled = IsAllFileds();
             }
         }
-        public string SubGroup { get => subGroup;
+        public string SubGroup
+        {
+            get => subGroup;
             set
             {
                 subGroup = value;
                 AddEnabled = IsAllFileds();
             }
         }
-        public string Subject { get => subject;
+        public string Subject
+        {
+            get => subject;
             set
             {
                 subject = value;
                 AddEnabled = IsAllFileds();
             }
         }
-        public string Teacher { get => teacher;
+        public string Teacher
+        {
+            get => teacher;
             set
             {
                 teacher = value;
@@ -71,84 +87,71 @@ namespace LabberClient.Workspace.AdminTab.JournalsCreater
         public JournalsCreaterPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            var view = (CollectionView)CollectionViewSource.GetDefaultView(Items);
-            view.SortDescriptions.Add(new SortDescription("Group", ListSortDirection.Ascending));
-            view.SortDescriptions.Add(new SortDescription("SubGroup", ListSortDirection.Ascending));
-            view.SortDescriptions.Add(new SortDescription("Subject", ListSortDirection.Ascending));
-            view.SortDescriptions.Add(new SortDescription("Teacher", ListSortDirection.Ascending));
-
             Add = new MvxCommand(AddBody);
             Delete = new MvxCommand(DeleteBody);
             DeleteAll = new MvxCommand(DeleteAllBody);
         }
 
-        public override void LoadData()
+        public override async void LoadData()
         {
-            Refresh();
+            await Refresh();
         }
 
-        private async void Refresh()
+        private Task Refresh()
         {
-            Items.Clear();
-            Groups.Clear();
-            Subjects.Clear();
-            Teachers.Clear();
-
-            List<string> groups = null;
-            List<string> subjects = null;
-            List<string> users = null;
-            List<Journal> journals = null;
-
-            await Task.Run(() =>
+            return Task.Run(() =>
             {
                 using (db = new DBWorker())
                 {
-                    groups = db.Groups.ToList().Select(x => x.Title).OrderBy(x => x).ToList();
-                    subjects = db.Subjects.ToList().Select(x => x.ShortTitle).OrderBy(x => x).ToList();
-                    users = db.Users.Where(x => x.RoleId == 2).ToList().Select(x => ShortFullName(x)).OrderBy(x => x).ToList();
-                    journals = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList();
+                    Groups = db.Groups.ToList().Select(x => x.Title).OrderBy(x => x).ToList();
+                    Subjects = db.Subjects.ToList().Select(x => x.ShortTitle).OrderBy(x => x).ToList();
+                    Teachers = db.Users.Where(x => x.RoleId == 2).ToList().Select(x => ShortFullName(x)).OrderBy(x => x).ToList();
+                    Items = db.Journals.Include(x => x.Group).Include(x => x.Subject).Include(x => x.User).ToList().Select(x => new JournalDTO(x)).ToList();
                 }
+                SubGroups = new List<string>() { "1", "2" };
+                DeleteAllEnabled = Items.Count != 0;
             });
-
-            groups?.ForEach(x => Groups.Add(x));
-            subjects?.ForEach(x => Subjects.Add(x));
-            users?.ForEach(x => Teachers.Add(x));
-            journals?.ForEach(x => Items.Add(new JournalDTO(x)));
         }
 
-        private void DeleteAllBody()
+        private async void DeleteAllBody()
         {
             using (db = new DBWorker())
             {
                 db.Journals.RemoveRange(db.Journals);
             }
-            Refresh();
+            InvokeResponseEvent(ResponseType.Good, "Журналы успешно удалены");
+            DeleteAllEnabled = false;
+            await Refresh();
         }
 
-        private void DeleteBody()
+        private async void DeleteBody()
         {
             using (db = new DBWorker())
             {
-                db.Journals.Remove(new Journal() { Id = CurrentItem.Id});
+                db.Journals.Remove(new Journal() { Id = CurrentItem.Id });
             }
-            Refresh();
+            InvokeResponseEvent(ResponseType.Good, "Журнал успешно удален");
+            await Refresh();
         }
 
-        private void AddBody()
+        private async void AddBody()
         {
             using (db = new DBWorker())
             {
                 var groupid = db.Groups.First(x => x.Title == Group).Id;
                 var subjectid = db.Subjects.First(x => x.ShortTitle == Subject).Id;
                 var teacherid = db.Users.Where(x => x.RoleId == 2).ToList().First(x => ShortFullName(x) == Teacher).Id;
-                if (!db.Journals.ToList().Exists(x => x.GroupId == groupid && x.SubjectId == subjectid && x.UserId == teacherid && x.SubGroup == SubGroup))
+                if (db.Journals.ToList().Exists(x => x.GroupId == groupid && x.SubjectId == subjectid && x.UserId == teacherid && x.SubGroup == SubGroup))
+                    InvokeResponseEvent(ResponseType.Bad, "Такой журнал уже добавлен");
+                else if (db.Journals.ToList().Exists(x => x.GroupId == groupid && x.SubjectId == subjectid && x.SubGroup == SubGroup))
+                    InvokeResponseEvent(ResponseType.Bad, "Невозможно добавить журнал, т.к. у такой группы и подгруппы по данной дисциплине уже существует журнал");
+                else
                 {
                     db.Journals.Add(new Journal(groupid, subjectid, teacherid, SubGroup));
-                }
-                else
-                    InvokeResponseEvent(ResponseType.Bad, "Такой журнал уже добавлен");
+                    InvokeResponseEvent(ResponseType.Good, "Журнал успешно добавлен");
+                }   
             }
-            Refresh();
+            await Refresh();
         }
 
         private string ShortFullName(User user)

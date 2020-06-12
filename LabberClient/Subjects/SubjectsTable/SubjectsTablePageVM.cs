@@ -92,12 +92,10 @@ namespace LabberClient.Subjects.SubjectsTable
             {
                 using (db = new DBWorker())
                 {
-                    Items = db.Subjects.ToList();
+                    Items = db.Subjects.ToList().OrderBy(x => x.ShortTitle).ToList();
                 }
             });
             DeleteAllEnabled = Items.Count > 0;
-            var view = (CollectionView)CollectionViewSource.GetDefaultView(Items);
-            view.SortDescriptions.Add(new SortDescription("ShortTitle", ListSortDirection.Ascending));
             InvokeLoadingStateEvent(false);
         }
 

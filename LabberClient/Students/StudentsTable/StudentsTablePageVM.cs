@@ -33,6 +33,8 @@ namespace LabberClient.Students.StudentsTable
         private string secondName = "";
         private Group currentGroup = new Group("");
         private string groupTitle = "";
+        private List<Student> items = new List<Student>();
+        private List<Group> groups = new List<Group>();
 
         public bool TableEnabled { get => tableEnabled; set { tableEnabled = value; Surname = ""; FirstName = ""; SecondName = ""; RaisePropertyChanged("TableEnabled"); } }
         public string AddSaveBtnTitle { get => addSaveBtnTitle; set { addSaveBtnTitle = value; RaisePropertyChanged("AddSaveBtnTitle"); } }
@@ -51,8 +53,7 @@ namespace LabberClient.Students.StudentsTable
                 currentGroup = value;
                 DeleteGroupEnabled = Groups.ToList().Exists(x => x.Title == currentGroup?.Title);
                 TableEnabled = DeleteGroupEnabled;
-                Items.Clear();
-                AllStudents.Where(x => x.Group?.Title == currentGroup?.Title).ToList().ForEach(x => Items.Add(x));
+                Items = AllStudents.Where(x => x.Group?.Title == currentGroup?.Title).ToList();
                 AddGroupEnabled = !Groups.ToList().Exists(x => x.Title == currentGroup?.Title) && currentGroup?.Title != "";
                 RaisePropertyChanged("CurrentGroup");
             }
@@ -98,9 +99,8 @@ namespace LabberClient.Students.StudentsTable
         bool IsAllFieldAreEmpty() => Surname == "" && FirstName == "" && SecondName == "";
 
         public List<Student> AllStudents { get; set; }
-        public ObservableCollection<Student> Items { get; set; } = new ObservableCollection<Student>();
-        public ObservableCollection<Group> Groups { get; set; } = new ObservableCollection<Group>();
-
+        public List<Student> Items { get => items; set { items = value; RaisePropertyChanged("Items"); } }
+        public List<Group> Groups { get => groups; set { groups = value; RaisePropertyChanged("Groups"); } }
         public MvxCommand Add { get; set; }
         public MvxCommand Change { get; set; }
         public MvxCommand Delete { get; set; }
@@ -113,14 +113,6 @@ namespace LabberClient.Students.StudentsTable
         public StudentsTablePageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            var view1 = (CollectionView)CollectionViewSource.GetDefaultView(Items);
-            view1.SortDescriptions.Add(new SortDescription("Surname", ListSortDirection.Ascending));
-            view1.SortDescriptions.Add(new SortDescription("FirtName", ListSortDirection.Ascending));
-            view1.SortDescriptions.Add(new SortDescription("SecondName", ListSortDirection.Ascending));
-
-            var view2 = (CollectionView)CollectionViewSource.GetDefaultView(Groups);
-            view2.SortDescriptions.Add(new SortDescription("Title", ListSortDirection.Ascending));
-
             Add = new MvxCommand(AddBody);
             AddGroup = new MvxCommand(AddGroupBody);
             Change = new MvxCommand(ChangeBody);
@@ -131,34 +123,28 @@ namespace LabberClient.Students.StudentsTable
             AddFromExcel = new MvxCommand(AddFromExcelBody);
         }
 
-        public override void LoadData()
+        public override async void LoadData()
         {
             if (DBWorker.FilePath != "")
-                Refresh(0);
+                await Refresh(0);
         }
 
-        private async void Refresh(uint groupid)
+        private Task Refresh(uint groupid)
         {
-            Groups.Clear();
-            Items.Clear();
-
-            List<Group> groups = new List<Group>();
-            await Task.Run(() =>
+            return Task.Run(() =>
             {
                 using (db = new DBWorker())
                 {
-                    groups = db.Groups.ToList();
-                    AllStudents = db.Students.Include(x => x.Group).ToList();
+                    Groups = db.Groups.ToList().OrderBy(x => x.Title).ToList();
+                    AllStudents = db.Students.Include(x => x.Group).ToList().OrderBy(x => x.Surname).ThenBy(x => x.FirstName).ThenBy(x => x.SecondName).ToList();
                 }
+                Items = AllStudents.Where(x => x.GroupId == groupid).ToList();
+
+                if (groupid != 0)
+                    GroupTitle = Groups.FirstOrDefault(x => x.Id == groupid)?.Title ?? "";
+                else
+                    GroupTitle = Groups.FirstOrDefault()?.Title ?? "";
             });
-
-            groups.ForEach(x => Groups.Add(x));
-            AllStudents.Where(x => x.GroupId == groupid).ToList().ForEach(x => Items.Add(x));
-
-            if (groupid != 0)
-                GroupTitle = Groups.FirstOrDefault(x => x.Id == groupid)?.Title ?? "";
-            else
-                GroupTitle = Groups.FirstOrDefault()?.Title ?? "";
         }
 
         private void DeleteGroupBody()
@@ -173,7 +159,7 @@ namespace LabberClient.Students.StudentsTable
             InvokeResponseEvent(ResponseType.Good, "Группа успешно удалена");
         }
 
-        private void AddGroupBody()
+        private async void AddGroupBody()
         {
             if (GroupTitle != "" && !Groups.ToList().Exists(x => x.Title == GroupTitle))
             {
@@ -183,7 +169,7 @@ namespace LabberClient.Students.StudentsTable
                     db.SaveChanges();
                     CurrentGroup = db.Groups.First(x => x.Title == GroupTitle);
                 }
-                Refresh(CurrentGroup.Id);
+                await Refresh(CurrentGroup.Id);
                 InvokeResponseEvent(ResponseType.Good, "Группа успешно добавлена");
             }
         }
@@ -194,6 +180,7 @@ namespace LabberClient.Students.StudentsTable
             {
                 db.Students.RemoveRange(Items);
             }
+            InvokeResponseEvent(ResponseType.Good, "Учащиеся успешно удалены");
             Refresh(CurrentGroup.Id);
             DeleteAllEnabled = false;
         }
@@ -205,13 +192,14 @@ namespace LabberClient.Students.StudentsTable
             SecondName = "";
         }
 
-        private void DeleteBody()
+        private async void DeleteBody()
         {
             using (db = new DBWorker())
             {
                 db.Students.Remove(Items.First(x => x.Surname == CurrentItem.Surname && x.FirstName == CurrentItem.FirstName && x.SecondName == CurrentItem.SecondName));
             }
-            Refresh(CurrentGroup.Id);
+            InvokeResponseEvent(ResponseType.Good, "Учащийся успешно удален");
+            await Refresh(CurrentGroup.Id);
             if (Items.Count == 0)
                 DeleteAllEnabled = false;
         }
@@ -230,7 +218,9 @@ namespace LabberClient.Students.StudentsTable
         {
             if (AddSaveBtnTitle == "Добавить")
             {
-                if (Items.ToList().Exists(x => x.Surname == Surname && x.FirstName == FirstName && x.SecondName == SecondName))
+                if (Surname.Replace(" ", "") == "" || FirstName.Replace(" ", "") == "")
+                    InvokeResponseEvent(ResponseType.Bad, "Информация об учащемся некорректна");
+                else if (Items.ToList().Exists(x => x.Surname == Surname && x.FirstName == FirstName && x.SecondName == SecondName))
                     InvokeResponseEvent(ResponseType.Bad, "Такой учащийся уже добавлен");
                 else
                 {
@@ -259,6 +249,11 @@ namespace LabberClient.Students.StudentsTable
             }
             else
             {
+                if (Surname.Replace(" ", "") == "" || FirstName.Replace(" ", "") == "")
+                {
+                    InvokeResponseEvent(ResponseType.Bad, "Информация об учащемся некорректна");
+                    return;
+                }
                 using (db = new DBWorker())
                 {
                     var stud = db.Students.First(x => x.GroupId == CurrentGroup.Id && x.Surname == CurrentItem.Surname && x.FirstName == CurrentItem.FirstName && x.SecondName == CurrentItem.SecondName);
@@ -345,7 +340,7 @@ namespace LabberClient.Students.StudentsTable
                             student.SubGroup = "2";
                         }
                     }
-                    Refresh(CurrentGroup.Id);
+                    await Refresh(CurrentGroup.Id);
                     DeleteAllEnabled = true;
                     InvokeResponseEvent(ResponseType.Good, "Учащиеся успешно добавлены из файла");
                 }

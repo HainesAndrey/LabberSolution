@@ -21,7 +21,7 @@ namespace LabberClient.Workspace.JournalsTab
         public JournalsTabPageVM(ResponseHandler ResponseEvent, PageEnabledHandler PageEnabledEvent, LoadingStateHandler LoadingStateEvent, CompleteStateHanlder CompleteStateEvent)
             : base(ResponseEvent, PageEnabledEvent, LoadingStateEvent, CompleteStateEvent)
         {
-            JournalsSelector = new JournalsSelectorPage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
+            JournalsSelector = new JournalsSelectorPage(false, InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
             (JournalsSelector.DataContext as JournalsSelectorPageVM).SelectedJournal += JournalsTabPageVM_SelectedJournal;
         }
 

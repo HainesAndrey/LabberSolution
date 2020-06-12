@@ -82,7 +82,7 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
                     }
                         
 
-                    row["Д"] = debts;
+                    row["Д"] = debts == 0 ? "" : debts.ToString();
 
                     foreach (var journal_lab in Journal_Labs)
                         row[journal_lab.Id.ToString()] = Marks.FirstOrDefault(x => x.StudentId == Students[i].Id && x.Journal_LabId == journal_lab.Id)?.PracticeState == "з." ? "зач" : "";

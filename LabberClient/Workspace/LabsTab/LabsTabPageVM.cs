@@ -26,8 +26,7 @@ namespace LabberClient.Workspace.LabsTab
 
         public string AddSaveBtnTitle { get => addSaveBtnTitle; set { addSaveBtnTitle = value; RaisePropertyChanged("AddSaveBtnTitle"); } }
         public string Number { get => number; set { number = value; RaisePropertyChanged("Number"); } }
-        public DateTime Date { get => date;
-            set { date = value; RaisePropertyChanged("Date"); } }
+        public DateTime Date { get => date; set { date = value; RaisePropertyChanged("Date"); } }
         public bool TableEnabled { get => tableEnabled; set { tableEnabled = value; RaisePropertyChanged("TableEnabled"); } }
 
         public Journal CurrentJournal { get => currentJournal; set { currentJournal = value; RaisePropertyChanged("CurrentJournal"); } }
@@ -55,28 +54,27 @@ namespace LabberClient.Workspace.LabsTab
             DeleteAll = new MvxCommand(DeleteAllBody);
             AddFromExcel = new MvxCommand(AddFromExcelBody);
 
-            JournalsSelectorPage = new JournalsSelectorPage(InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
+            JournalsSelectorPage = new JournalsSelectorPage(true, InvokeResponseEvent, InvokePageEnabledEvent, InvokeLoadingStateEvent, InvokeCompleteStateEvent);
             (JournalsSelectorPage.DataContext as JournalsSelectorPageVM).SelectedJournal += LabsTabPageVM_SelectedJournal;
         }
 
-        private void LabsTabPageVM_SelectedJournal(Journal journal)
+        private async void LabsTabPageVM_SelectedJournal(Journal journal)
         {
             CurrentJournal = journal;
             TableEnabled = true;
-            Refresh();
+            await Refresh();
         }
 
         public override void LoadData()
         {
             //InvokeLoadingStateEvent(true);
             Refresh();
-            (JournalsSelectorPage.DataContext as JournalsSelectorPageVM).NeedToDisplayAllJournals = false;
             //InvokeLoadingStateEvent(false);
         }
 
-        private async void Refresh()
+        private Task Refresh()
         {
-            await Task.Run(() =>
+            return Task.Run(() =>
             {
                 using (db = new DBWorker())
                 {
@@ -90,13 +88,13 @@ namespace LabberClient.Workspace.LabsTab
             //GroupByGroups.Execute();
         }
 
-        private void DeleteAllBody()
+        private async void DeleteAllBody()
         {
             using (db = new DBWorker())
             {
                 db.Journals_Labs.RemoveRange(Items);
             }
-            Refresh();
+            await Refresh();
         }
 
         private void ClearBody()
@@ -105,13 +103,13 @@ namespace LabberClient.Workspace.LabsTab
             Date = DateTime.Now;
         }
 
-        private void DeleteBody()
+        private async void DeleteBody()
         {
             using (db = new DBWorker())
             {
                 db.Labs.Remove(CurrentItem.Lab);
             }
-            Refresh();
+            await Refresh();
         }
 
         private void ChangeBody()
@@ -125,14 +123,21 @@ namespace LabberClient.Workspace.LabsTab
 
         private async void AddBody()
         {
+            double number = 0;
+            if (!double.TryParse(Number.Replace('.', ','), out number))
+            {
+                InvokeResponseEvent(ResponseType.Bad, "Номер лабораторной работы некорректный");
+                return;
+            }
+
             if (AddSaveBtnTitle == "Добавить")
             {
-                if (Items.ToList().Exists(x => x.Lab.Number == double.Parse(Number)))
+                if (Items.ToList().Exists(x => x.Lab.Number == number))
                     InvokeResponseEvent(ResponseType.Bad, "Лабораторная работа с таким номером уже добавлена");
                 else
-                {
+                {   
                     InvokeLoadingStateEvent(true);
-                    Lab lab = new Lab(double.Parse(Number), "");
+                    Lab lab = new Lab(number, "");
                     await Task.Run(() =>
                     {
                         using (db = new DBWorker())
@@ -148,12 +153,14 @@ namespace LabberClient.Workspace.LabsTab
                         }
                     });
                     InvokeResponseEvent(ResponseType.Good, "Лабораторная работа добавлена");
-                    Refresh();
+                    await Refresh();
                     InvokeLoadingStateEvent(false);
                 }
             }
             else
             {
+                if (CurrentItem.Lab.Number != number && Items.ToList().Exists(x => x.Lab.Number == number))
+                    InvokeResponseEvent(ResponseType.Bad, "Лабораторная работа с таким номером уже добавлена");
                 InvokeLoadingStateEvent(true);
                 await Task.Run(() =>
                 {
@@ -165,7 +172,7 @@ namespace LabberClient.Workspace.LabsTab
                     }
                 });
                 InvokeLoadingStateEvent(false);
-                Refresh();
+                await Refresh();
 
                 AddSaveBtnTitle = "Добавить";
                 InvokeResponseEvent(ResponseType.Good, "Лабораторная работа успешно отредактирована");
@@ -240,7 +247,7 @@ namespace LabberClient.Workspace.LabsTab
                             db.Subjects.AddRange(subjects);
                         }
                     });
-                    Refresh();
+                    await Refresh();
                     DeleteAllEnabled = true;
                     InvokeResponseEvent(ResponseType.Good, "Дисциплины успешно добавлены из файла");
                     InvokeLoadingStateEvent(false);

@@ -108,25 +108,20 @@ namespace LabberClient.CreateDB.UsersTable
             //InvokePageEnabledEvent(true);
         }
 
-        private async void Refresh()
+        private Task Refresh()
         {
-            InvokeLoadingStateEvent(true);
-            if (DBWorker.FilePath != "")
-                await Task.Run(() =>
-                {
+            return Task.Run(() =>
+            {
+                InvokeLoadingStateEvent(true);
+                if (DBWorker.FilePath != "")
                     using (db = new DBWorker())
                     {
-                        Users = db.Users.ToList().Select(x => new UserDTO(x)).ToList();
+                        Users = db.Users.ToList().Select(x => new UserDTO(x)).ToList().OrderByDescending(x => x.IsAdmin).ThenBy(x => x.User.Login).ToList();
                     }
-                });
-            if (Users.Count > 1)
-                DeleteAllEnabled = true;
-            var view = (CollectionView)CollectionViewSource.GetDefaultView(Users);
-            view.SortDescriptions.Add(new SortDescription("IsAdmin", ListSortDirection.Descending));
-            view.SortDescriptions.Add(new SortDescription("User.Surname", ListSortDirection.Ascending));
-            view.SortDescriptions.Add(new SortDescription("User.FirstName", ListSortDirection.Ascending));
-            view.SortDescriptions.Add(new SortDescription("User.SecondName", ListSortDirection.Ascending));
-            InvokeLoadingStateEvent(false);
+                if (Users.Count > 1)
+                    DeleteAllEnabled = true;
+                InvokeLoadingStateEvent(false);
+            });
         }
 
         private void ClearBody()
@@ -269,7 +264,7 @@ namespace LabberClient.CreateDB.UsersTable
 
 
                         });
-                        Refresh();
+                        await Refresh();
                     }
                     catch (FileNotFoundException)
                     {
@@ -310,7 +305,7 @@ namespace LabberClient.CreateDB.UsersTable
                                 db.Users.Add(new User((uint)(IsAdmin ? 1 : 2), Login, Surname, FirstName, SecondName));
                             }
                         });
-                        Refresh();
+                        await Refresh();
                     }
                     catch (FileNotFoundException)
                     {
@@ -342,7 +337,7 @@ namespace LabberClient.CreateDB.UsersTable
                         //user.Password = 
                         user.RoleId = (uint)(IsAdmin ? 1 : 2);
                     }
-                    Refresh();
+                    await Refresh();
                     AddSaveUserBtnTitle = "Добавить";
                     InvokeResponseEvent(ResponseType.Good, "Пользователь успешно отредактирован");
                     Clear.Execute();

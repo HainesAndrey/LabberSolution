@@ -61,7 +61,10 @@ namespace LabberClient.Workspace.JournalsTab.JournalTable
 
         private string ShortFullName(Student student)
         {
-            return $"{student.Surname} {student.FirstName[0]}.{student.SecondName[0]}.";
+            if (student.SecondName != "")
+                return $"{student.Surname} {student.FirstName[0]}.{student.SecondName?[0]}.";
+            else
+                return $"{student.Surname} {student.FirstName[0]}";
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
